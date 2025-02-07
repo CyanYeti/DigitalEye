@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter_shaders/flutter_shaders.dart';
 import 'src/features/camera/camera_widget.dart';
+import 'src/features/filters/posterize_widget.dart';
 import 'dart:math';
 
 void main() {
@@ -20,7 +21,8 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeMode.dark,
       theme: ThemeData.dark(),
       debugShowCheckedModeBanner: false,
-      home: const CameraWidget(),
+      //home: const CameraWidget(),
+      home: const PosterizeWidget(),
       //home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
