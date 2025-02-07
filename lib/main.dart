@@ -1,4 +1,9 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:camera/camera.dart';
+import 'package:flutter_shaders/flutter_shaders.dart';
+import 'src/features/camera/camera_widget.dart';
+import 'dart:math';
 
 void main() {
   runApp(const MyApp());
@@ -11,29 +16,249 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      title: 'Flutter Camera DigitalEye',
+      themeMode: ThemeMode.dark,
+      theme: ThemeData.dark(),
+      debugShowCheckedModeBanner: false,
+      home: const CameraWidget(),
+      //home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
+// Code from camera tutorial
+//import 'dart:io';
+//
+//import 'package:camera/camera.dart';
+//import 'package:flutter/material.dart';
+//import 'package:video_player/video_player.dart';
+
+class CameraPage extends StatefulWidget {
+  const CameraPage({super.key});
+
+  @override
+  CameraPageState createState() => CameraPageState();
+}
+
+class CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
+  CameraController? _controller;
+  bool _isCameraInitialized = false;
+  late final List<CameraDescription> _cameras;
+  bool _isRecording = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    initCamera();
+  }
+
+  Future<void> initCamera() async {
+    _cameras = await availableCameras();
+    // Initialize the camera with the first camera in the list
+    await onNewCameraSelected(_cameras[0]);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // App state changed before we got the chance to initialize.
+    final CameraController? cameraController = _controller;
+
+    // App state changed before we got the chance to initialize.
+    if (cameraController == null || !cameraController.value.isInitialized) {
+     return;
+    }
+
+    if (state == AppLifecycleState.inactive) {
+      // Free up memory when camera not active
+      cameraController.dispose();
+    } else if (state == AppLifecycleState.resumed) {
+      // Reinitialize the camera with same properties
+      onNewCameraSelected(cameraController.description);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  Future<XFile?> capturePhoto() async {
+    final CameraController? cameraController = _controller;
+    if (cameraController!.value.isTakingPicture) {
+      // A capture is already pending, do nothing.
+      return null;
+    }
+    try {
+      await cameraController.setFlashMode(FlashMode.off);
+      XFile file = await cameraController.takePicture();
+      return file;
+    } on CameraException catch (e) {
+      debugPrint('Error occured while taking picture: $e');
+      return null;
+    }
+  }
+
+//  Future<XFile?> captureVideo() async {
+//    final CameraController? cameraController = _controller;
+//    try {
+//      setState(() {
+//        _isRecording = true;
+//      });
+//      await cameraController?.startVideoRecording();
+//      await Future.delayed(const Duration(seconds: 5));
+//      final video = await cameraController?.stopVideoRecording();
+//      setState(() {
+//        _isRecording = false;
+//      });
+//      return video;
+//    } on CameraException catch (e) {
+//      debugPrint('Error occured while taking picture: $e');
+//      return null;
+//    }
+//  }
+
+  void _onTakePhotoPressed() async {
+    final navigator = Navigator.of(context);
+    final xFile = await capturePhoto();
+    if (xFile != null) {
+      //if (xFile.path.isNotEmpty) {
+      //  navigator.push(
+      //    MaterialPageRoute(
+      //      builder: (context) => PreviewPage(
+      //        imagePath: xFile.path,
+      //      ),
+      //    ),
+      //  );
+      //}
+    }
+  }
+
+  Widget cameraWidget(context) {
+    if (_controller == null || !_controller!.value.isInitialized) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    var camera = _controller!.value;
+    // fetch screen size
+    final size = MediaQuery.of(context).size;
+        
+
+    //double aspectRatio = camera.previewSize!.height / camera.previewSize!.width;
+    //double scale = size.height / (size.width * aspectRatio);
+    // calculate scale depending on screen and camera ratios
+    // this is actually size.aspectRatio / (1 / camera.aspectRatio)
+    // because camera preview size is received as landscape
+    // but we're calculating for portrait orientation
+    var scale = size.aspectRatio * camera.aspectRatio;
+
+    // to prevent scaling down, invert the value
+    if (scale < 1) scale = 1 / scale;
+
+    return Transform.scale(
+      scale: scale,
+      child: Center(
+        child: CameraPreview(_controller!),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isCameraInitialized) {
+      return ShaderBuilder(
+        assetKey: 'lib/test_sobel.frag', 
+        (BuildContext context, FragmentShader shader, _) => AnimatedSampler (
+          (ui.Image image, Size size, Canvas canvas) {
+            shader
+              ..setFloat(0, size.width)
+              ..setFloat(1, size.height)
+              ..setImageSampler(0, image);
+            canvas.drawRect(Offset.zero & size, Paint()..shader = shader);
+          },
+          child: Center(
+            child: cameraWidget(context)
+          ),
+        )
+      );
+      //return SafeArea(
+      //  child: Scaffold(
+      //    body: Column(
+      //      children: [
+      //        //cameraWidget(context),
+      //        CameraPreview(_controller!),
+      //        const SizedBox(
+      //          height: 10,
+      //        ),
+      //        Row(
+      //          mainAxisAlignment: MainAxisAlignment.center,
+      //          children: [
+      //            if (!_isRecording)
+      //              ElevatedButton(
+      //                onPressed: _onTakePhotoPressed,
+      //                style: ElevatedButton.styleFrom(
+      //                    fixedSize: const Size(70, 70),
+      //                    shape: const CircleBorder(),
+      //                    backgroundColor: Colors.white),
+      //                child: const Icon(
+      //                  Icons.camera_alt,
+      //                  color: Colors.black,
+      //                  size: 30,
+      //                ),
+      //              ),
+      //          ],
+      //        ),
+      //      ],
+      //    ),
+      //  ),
+      //);
+    } else {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+  }
+
+  Future<void> onNewCameraSelected(CameraDescription description) async {
+    final previousCameraController = _controller;
+
+    // Instantiating the camera controller
+    final CameraController cameraController = CameraController(
+      description,
+      ResolutionPreset.high,
+      imageFormatGroup: ImageFormatGroup.jpeg,
+    );
+
+    // Initialize controller
+    try {
+      await cameraController.initialize();
+    } on CameraException catch (e) {
+      debugPrint('Error initializing camera: $e');
+    }
+    // Dispose the previous controller
+    await previousCameraController?.dispose();
+
+    // Replace with the new controller
+    if (mounted) {
+      setState(() {
+        _controller = cameraController;
+      });
+    }
+
+    // Update UI if controller updated
+    cameraController.addListener(() {
+      if (mounted) setState(() {});
+    });
+
+    // Update the Boolean
+    if (mounted) {
+      setState(() {
+        _isCameraInitialized = _controller!.value.isInitialized;
+      });
+    }
+  }
+}
+
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
