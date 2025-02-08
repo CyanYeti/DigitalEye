@@ -17,6 +17,11 @@ class _PosterizeWidgetState extends State<PosterizeWidget> {
     bool useShader = true;
 
     @override
+    void dispose() {
+        super.dispose();
+    }
+
+    @override
     Widget build(BuildContext context){
         return Scaffold(
             appBar: AppBar(actions: [

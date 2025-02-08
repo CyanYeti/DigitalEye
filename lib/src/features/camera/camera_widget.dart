@@ -18,7 +18,7 @@ class _CameraWidgetState extends State<CameraWidget> {
   // get list of cameras async
   final Future<List<CameraDescription>> _camerasFuture = availableCameras();
   late CameraDescription camera;
-  late CameraController controller;
+  CameraController? controller;
 
   @override
   void initState() {
@@ -26,12 +26,12 @@ class _CameraWidgetState extends State<CameraWidget> {
     //start pulling camera data on init
     _camerasFuture.then((cameras) {
       controller = CameraController(cameras[0], ResolutionPreset.high);
-      controller.initialize().then((_) {
+      controller?.initialize().then((_) {
         if (!mounted) {
           return;
         }
         setState(() {});
-        controller.startImageStream((image) => setState(() {}));
+        controller?.startImageStream((image) => setState(() {}));
       }).catchError((Object e) => print(e));
     });
   }
@@ -46,12 +46,15 @@ class _CameraWidgetState extends State<CameraWidget> {
 
   @override
   void dispose() {
-    controller.dispose();
+    controller?.dispose();
     super.dispose();
   }
 
   Widget scaledCameraWidget(context) {
-    var camera = controller.value;
+    if (controller == null || !controller!.value.isInitialized) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    var camera = controller!.value;
     // fetch screen size
     final size = MediaQuery.of(context).size;
         
@@ -62,7 +65,7 @@ class _CameraWidgetState extends State<CameraWidget> {
     // this is actually size.aspectRatio / (1 / camera.aspectRatio)
     // because camera preview size is received as landscape
     // but we're calculating for portrait orientation
-    var scale = size.aspectRatio * camera.aspectRatio;
+    var scale = size.aspectRatio * camera!.aspectRatio;
 
     // to prevent scaling down, invert the value
     if (scale < 1) scale = 1 / scale;
@@ -70,7 +73,7 @@ class _CameraWidgetState extends State<CameraWidget> {
     return Transform.scale(
       scale: scale,
       child: Center(
-        child: CameraPreview(controller),
+        child: CameraPreview(controller!),
       ),
     );
   }
@@ -92,7 +95,7 @@ class _CameraWidgetState extends State<CameraWidget> {
       body: FutureBuilder(
         future: _camerasFuture,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
+          if (controller != null && snapshot.connectionState == ConnectionState.done) {
             if (useShader) {
               return ShaderBuilder(
                 assetKey: 'shaders/saturation.frag',
@@ -112,7 +115,7 @@ class _CameraWidgetState extends State<CameraWidget> {
                 ),
               );
             } else {
-              return Center(child: CameraPreview(controller));
+              return Center(child: CameraPreview(controller!));
             }
           } else {
             return const Center(child: CircularProgressIndicator());
