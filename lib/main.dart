@@ -4,6 +4,9 @@ import 'package:camera/camera.dart';
 import 'package:flutter_shaders/flutter_shaders.dart';
 import 'src/features/camera/camera_widget.dart';
 import 'src/features/filters/posterize_widget.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import './src/features/shader_ui.dart';
 import 'dart:math';
 
 void main() {
@@ -22,7 +25,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData.dark(),
       debugShowCheckedModeBanner: false,
       //home: const CameraWidget(),
-      home: const PosterizeWidget(),
+      home: ProviderScope(
+        child: ShaderUI(),
+      ),
       //home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }

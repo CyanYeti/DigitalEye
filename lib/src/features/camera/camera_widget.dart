@@ -2,52 +2,75 @@ import 'dart:ui' as ui;
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_shaders/flutter_shaders.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-class CameraWidget extends StatefulWidget {
-  const CameraWidget({super.key});
+class CameraImageState extends StateNotifier<Map<String, CameraImage>> {
+  CameraImageState() : super({}) {}
 
-  @override
-  _CameraWidgetState createState() => _CameraWidgetState();
+  void setCameraImage(CameraImage image) {
+    state = {"image": image};
+  }
 }
 
-class _CameraWidgetState extends State<CameraWidget> {
-  bool useShader = true;
-  double _currentSaturation = 1.0;
+final cameraImageProvider = StateNotifierProvider<CameraImageState, Map<String, CameraImage>>((ref) => CameraImageState());
 
+class CameraWidget extends ConsumerStatefulWidget {
+  const CameraWidget({super.key});
+  //const CameraWidget({Key? key}) : super(key : key);
+
+  @override
+  ConsumerState<CameraWidget> createState() => _CameraWidgetState();
+}
+
+class _CameraWidgetState extends ConsumerState<CameraWidget> {
   // get list of cameras async
   final Future<List<CameraDescription>> _camerasFuture = availableCameras();
-  late CameraDescription camera;
   CameraController? controller;
 
   @override
   void initState() {
     super.initState();
+    _initializeCameraController();
+  }
+
+  void _initializeCameraController() {
     //start pulling camera data on init
     _camerasFuture.then((cameras) {
-      controller = CameraController(cameras[0], ResolutionPreset.high);
-      controller?.initialize().then((_) {
+      controller = CameraController(cameras[0], ResolutionPreset.max);
+      controller!.initialize().then((_) async {
         if (!mounted) {
           return;
         }
         setState(() {});
-        controller?.startImageStream((image) => setState(() {}));
+        controller?.startImageStream((image) => setState(() {
+          ref.read(cameraImageProvider.notifier).setCameraImage(image);
+        }));
       }).catchError((Object e) => print(e));
     });
   }
-
-  //Future<void> initializeCamera() async {
-  //  final cameras = await availableCameras();
-
-  //  controller = CameraController(cameras[0], ResolutionPreset.max);
-
-  //  await controller.initialize();
-  //}
 
   @override
   void dispose() {
     controller?.dispose();
     super.dispose();
+  }
+
+  // From camera doc to dispose camera on inactive app
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final CameraController? cameraController = controller;
+  
+    // App state changed before we got the chance to initialize.
+    if (cameraController == null || !cameraController.value.isInitialized) {
+      return;
+    }
+  
+    if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
+      cameraController.dispose();
+    } else if (state == AppLifecycleState.resumed) {
+      _initializeCameraController();
+    }
   }
 
   Widget scaledCameraWidget(context) {
@@ -81,42 +104,13 @@ class _CameraWidgetState extends State<CameraWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(actions: [
-        Slider(
-          value: _currentSaturation,
-          max: 2.0,
-          divisions: 100,
-          label: _currentSaturation.toString(),
-          onChanged: (double value) {
-            setState(() {_currentSaturation = value;});
-          },
-        ),
-      ]),
       body: FutureBuilder(
         future: _camerasFuture,
         builder: (context, snapshot) {
           if (controller != null && snapshot.connectionState == ConnectionState.done) {
-            if (useShader) {
-              return ShaderBuilder(
-                assetKey: 'shaders/saturation.frag',
-                (BuildContext context, FragmentShader shader, _) => AnimatedSampler(
-                  (ui.Image image, Size size, Canvas canvas) {
-                    shader
-                      ..setFloat(0, size.width)
-                      ..setFloat(1, size.height)
-                      ..setFloat(2, _currentSaturation)
-                      ..setImageSampler(0, image);
-                    canvas.drawRect(Offset.zero & size, Paint()..shader = shader);
-                  },
-                  //child: CameraPreview(controller),
-                  child: Center(
-                    child: scaledCameraWidget(context),
-                  ),
-                ),
-              );
-            } else {
-              return Center(child: CameraPreview(controller!));
-            }
+            return Center(
+              child: scaledCameraWidget(context),
+            );
           } else {
             return const Center(child: CircularProgressIndicator());
           }
