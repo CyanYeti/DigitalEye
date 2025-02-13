@@ -17,7 +17,7 @@ flutter run
 | Posterize | :heavy_check_mark:     |
 | Steps / Notan | :heavy_multiplication_x:|
 | Contrast    | :heavy_check_mark:|
-| Brightness    | :heavy_check_mark|
+| Brightness    | :heavy_check_mark:|
 | Exposure    | :heavy_multiplication_x:|
 | ColorPicker    | :heavy_multiplication_x:|
 | ColorPickerArea    | :heavy_multiplication_x:|

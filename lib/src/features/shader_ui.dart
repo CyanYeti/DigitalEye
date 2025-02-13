@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:screenshot/screenshot.dart';
 import './filters/posterize_widget.dart';
 import './camera/camera_widget.dart';
+import './camera/screenshot_widget.dart';
 
 class ShaderState extends StateNotifier<Map<String, dynamic>> {
     ShaderState() : super({}) {
@@ -119,7 +121,7 @@ class ShaderUI extends ConsumerWidget {
                         ],
                     ),
                     Expanded(
-                        child: PosterizeWidget(),
+                        child: ScreenshotWidget(),
                     ),
                 ],
             ),
