@@ -50,7 +50,10 @@ class ShaderUI extends ConsumerWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                                 FloatingActionButton(
-                                    //onPressed: () => ref.read(shaderProvider.notifier).updateShaderSetting('posterize/toRender', true),
+                                    onPressed: () => ref.read(shaderProvider.notifier).setDefaultShaderSettings(),
+                                    child: Icon(Icons.restart_alt),
+                                ),
+                                FloatingActionButton(
                                     onPressed: () => ref.read(shaderProvider.notifier).toggleBoolShaderSetting('posterize/toRender'),
                                     child: Icon(Icons.compare_rounded),
                                 ),

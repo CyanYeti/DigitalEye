@@ -30,6 +30,7 @@ flutter run
 | Blur | :heavy_multiplication_x:|
 | Image Select | :heavy_multiplication_x:|
 | Color Palettes | :heavy_multiplication_x:|
+| Reset | :heavy_check_mark:|
 
 
 ## Known Issues
