@@ -6,7 +6,7 @@ A simple camera app to quickly apply common filters for artists and colorblind. 
 
 Currently this is a simple flutter app. Due to an issue with impeller, run with:
 ```
-flutter run --no-enable-impeller
+flutter run
 ```
 
 ## Features
@@ -14,7 +14,7 @@ flutter run --no-enable-impeller
 | Feature    | Implemented |
 | -------- | ------- |
 | Saturation  | :heavy_check_mark:    |
-| Posterize | :heavy_multiplication_x:     |
+| Posterize | :heavy_check_mark:     |
 | Steps / Notan | :heavy_multiplication_x:|
 | Contrast    | :heavy_multiplication_x:|
 | Exposure    | :heavy_multiplication_x:|
