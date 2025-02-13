@@ -71,34 +71,52 @@ class ShaderUI extends ConsumerWidget {
                         ),
                     ),
                     // saturation slider
-                    Slider(
-                        value: ref.read(shaderProvider.notifier).state['saturation/level'],
-                        max: 2.0,
-                        divisions: 200,
-                        label: ref.read(shaderProvider.notifier).state['saturation/level'].toString(),
-                        onChanged: (double value) {
-                            ref.read(shaderProvider.notifier).updateShaderSetting('saturation/level', value);
-                        },
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                            Text("saturation"),
+                            Slider(
+                                value: ref.read(shaderProvider.notifier).state['saturation/level'],
+                                max: 2.0,
+                                divisions: 200,
+                                label: ref.read(shaderProvider.notifier).state['saturation/level'].toString(),
+                                onChanged: (double value) {
+                                    ref.read(shaderProvider.notifier).updateShaderSetting('saturation/level', value);
+                                },
+                            ),
+                        ],
                     ),
                     // brightness slider
-                    Slider(
-                        value: ref.read(shaderProvider.notifier).state['brightness/level'],
-                        max: 2.0,
-                        divisions: 200,
-                        label: ref.read(shaderProvider.notifier).state['brightness/level'].toString(),
-                        onChanged: (double value) {
-                            ref.read(shaderProvider.notifier).updateShaderSetting('brightness/level', value);
-                        },
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                            Text("brightness"),
+                            Slider(
+                                value: ref.read(shaderProvider.notifier).state['brightness/level'],
+                                max: 2.0,
+                                divisions: 200,
+                                label: ref.read(shaderProvider.notifier).state['brightness/level'].toString(),
+                                onChanged: (double value) {
+                                    ref.read(shaderProvider.notifier).updateShaderSetting('brightness/level', value);
+                                },
+                            ),
+                        ],
                     ),
                     // contrast slider
-                    Slider(
-                        value: ref.read(shaderProvider.notifier).state['contrast/level'],
-                        max: 2.0,
-                        divisions: 200,
-                        label: ref.read(shaderProvider.notifier).state['contrast/level'].toString(),
-                        onChanged: (double value) {
-                            ref.read(shaderProvider.notifier).updateShaderSetting('contrast/level', value);
-                        },
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                            Text("contrast"),
+                            Slider(
+                                value: ref.read(shaderProvider.notifier).state['contrast/level'],
+                                max: 2.0,
+                                divisions: 200,
+                                label: ref.read(shaderProvider.notifier).state['contrast/level'].toString(),
+                                onChanged: (double value) {
+                                    ref.read(shaderProvider.notifier).updateShaderSetting('contrast/level', value);
+                                },
+                            ),
+                        ],
                     ),
                     Expanded(
                         child: PosterizeWidget(),
