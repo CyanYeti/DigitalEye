@@ -28,7 +28,9 @@ class _ScreenshotWidgetState extends State<ScreenshotWidget> {
     void saveImage() async {
         final hasAccess = await Gal.hasAccess(toAlbum: true);
 
-        await Gal.requestAccess(toAlbum: true);
+        if (!hasAccess) {
+            await Gal.requestAccess(toAlbum: true);
+        }
 
         await Gal.putImageBytes(_imageFile!);
 

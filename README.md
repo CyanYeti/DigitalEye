@@ -23,8 +23,8 @@ flutter run
 | ColorPickerArea    | :heavy_multiplication_x:|
 | ColorPickerSmartArea | :heavy_multiplication_x:|
 | ColorPickerSmartScreen | :heavy_multiplication_x:|
-| CaptureImage | :heavy_multiplication_x:|
-| CaptureWithFilters | :heavy_multiplication_x:|
+| CaptureImage | :heavy_check_mark:|
+| CaptureWithFilters | :heavy_check_mark:|
 | Horizontal Flip | :heavy_multiplication_x:|
 | Vertical Flip | :heavy_multiplication_x:|
 | Blur | :heavy_multiplication_x:|
@@ -36,4 +36,5 @@ flutter run
 ## Known Issues
 -Currently not working with new impeller renderer.
 -ndk version mismatch
+-The gallery opens to an error on some Android/Samsung devices due to Gal.open() bug
 
