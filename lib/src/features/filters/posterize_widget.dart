@@ -4,19 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_shaders/flutter_shaders.dart';
-import './saturation_widget.dart';
+import './brightness_widget.dart';
 import '../shader_ui.dart';
 
 class PosterizeWidget extends ConsumerWidget {
     const PosterizeWidget({super.key});
     
-    final SaturationWidget saturationWidget = const SaturationWidget();
+    final BrightnessWidget brightnessWidget = const BrightnessWidget();
 
     @override
     Widget build(BuildContext context, WidgetRef ref) {
         final shaderSettings = ref.watch(shaderProvider);
-        double _posterizeSteps = 4; //must be double for sampler but must be whole number for shader
-        bool useShader = true;
 
         return Builder(
             builder: (context) {
@@ -32,11 +30,11 @@ class PosterizeWidget extends ConsumerWidget {
                                     ..setImageSampler(0, image);
                                 canvas.drawRect(Offset.zero & size, Paint()..shader = shader);
                             },
-                            child: saturationWidget,
+                            child: brightnessWidget,
                         ),
                     );
                 } else {
-                    return saturationWidget;
+                    return brightnessWidget;
                 }
             }
         );

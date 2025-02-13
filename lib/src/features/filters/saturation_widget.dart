@@ -25,7 +25,7 @@ class SaturationWidget extends ConsumerWidget {
                             shader
                                 ..setFloat(0, size.width)
                                 ..setFloat(1, size.height)
-                                ..setFloat(2, shaderSettings['saturation/saturation'] ?? 1.0)
+                                ..setFloat(2, shaderSettings['saturation/level'] ?? 1.0)
                                 ..setImageSampler(0, image);
                             canvas.drawRect(Offset.zero & size, Paint()..shader = shader);
                         },

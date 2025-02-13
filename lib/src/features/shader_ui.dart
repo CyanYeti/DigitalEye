@@ -13,7 +13,9 @@ class ShaderState extends StateNotifier<Map<String, dynamic>> {
         state = {
             'posterize/steps': 1.0,
             'posterize/toRender': false,
-            'saturation/saturation': 1.0,
+            'saturation/level': 1.0,
+            'brightness/level': 1.0,
+            'contrast/level': 1.0,
         };
     }
 
@@ -67,12 +69,32 @@ class ShaderUI extends ConsumerWidget {
                     ),
                     // saturation slider
                     Slider(
-                        value: ref.read(shaderProvider.notifier).state['saturation/saturation'],
+                        value: ref.read(shaderProvider.notifier).state['saturation/level'],
                         max: 2.0,
                         divisions: 200,
-                        label: ref.read(shaderProvider.notifier).state['saturation/saturation'].toString(),
+                        label: ref.read(shaderProvider.notifier).state['saturation/level'].toString(),
                         onChanged: (double value) {
-                            ref.read(shaderProvider.notifier).updateShaderSetting('saturation/saturation', value);
+                            ref.read(shaderProvider.notifier).updateShaderSetting('saturation/level', value);
+                        },
+                    ),
+                    // brightness slider
+                    Slider(
+                        value: ref.read(shaderProvider.notifier).state['brightness/level'],
+                        max: 2.0,
+                        divisions: 200,
+                        label: ref.read(shaderProvider.notifier).state['brightness/level'].toString(),
+                        onChanged: (double value) {
+                            ref.read(shaderProvider.notifier).updateShaderSetting('brightness/level', value);
+                        },
+                    ),
+                    // contrast slider
+                    Slider(
+                        value: ref.read(shaderProvider.notifier).state['contrast/level'],
+                        max: 2.0,
+                        divisions: 200,
+                        label: ref.read(shaderProvider.notifier).state['contrast/level'].toString(),
+                        onChanged: (double value) {
+                            ref.read(shaderProvider.notifier).updateShaderSetting('contrast/level', value);
                         },
                     ),
                     Expanded(
