@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:screenshot/screenshot.dart';
 import './filters/posterize_widget.dart';
+import './ui/floating_button.dart';
 import './camera/camera_widget.dart';
 import './camera/screenshot_widget.dart';
 
@@ -118,6 +119,14 @@ class ShaderUI extends ConsumerWidget {
                                     ref.read(shaderProvider.notifier).updateShaderSetting('contrast/level', value);
                                 },
                             ),
+                        ],
+                    ),
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                            FloatingButton(onChanged: (val) {
+                                ref.read(shaderProvider.notifier).updateShaderSetting('contrast/level', val);
+                            }),
                         ],
                     ),
                     Expanded(
