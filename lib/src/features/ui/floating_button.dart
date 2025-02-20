@@ -132,28 +132,30 @@ class _FloatingButtonState extends State<FloatingButton> {
                 return Positioned(
                     top: position.dy - widget.sliderHeight / 2.0,
                     left: position.dx - widget.sliderWidth / 2.0,
-                    child: Container(
-                        height: widget.sliderHeight,
-                        width: widget.sliderWidth,
+                    child: TapRegion(
+                        onTapOutside: (details) => _onDragEnd(context),
+                        child: Container(
+                            height: widget.sliderHeight,
+                            width: widget.sliderWidth,
 
-                        //child: Image.asset('assets/Gradient.png', fit: BoxFit.contain),
-                        child: GestureDetector(
-                            onDoubleTap: () => _onDragEnd(context),
-                            onVerticalDragStart: (details) => _onDragStart(context, details),
-                            onVerticalDragEnd: (details) => _onDragEnd(context, details),
-                            onVerticalDragUpdate: (details) => _onDragUpdate(context, details),
-                            //child: Image.asset('assets/Gradient.png'),
-                            child: CustomPaint(
-                                foregroundPainter: SliderBarPainter(
-                                    color: widget.sliderColor,
-                                    sliderPosition: _dragPosition,
-                                    dragPercentage: _dragPercentage,
-                                    width: widget.sliderWidth,
-                                    repaint: _repaint,
-                                ),
-                                painter: SliderPainter(
-                                    color: widget.sliderBackgroundColor,
-                                    maxSize: Size(widget.sliderWidth, widget.sliderHeight),
+                            //child: Image.asset('assets/Gradient.png', fit: BoxFit.contain),
+                            child: GestureDetector(
+                                onVerticalDragStart: (details) => _onDragStart(context, details),
+                                onVerticalDragEnd: (details) => _onDragEnd(context, details),
+                                onVerticalDragUpdate: (details) => _onDragUpdate(context, details),
+                                //child: Image.asset('assets/Gradient.png'),
+                                child: CustomPaint(
+                                    foregroundPainter: SliderBarPainter(
+                                        color: widget.sliderColor,
+                                        sliderPosition: _dragPosition,
+                                        dragPercentage: _dragPercentage,
+                                        width: widget.sliderWidth,
+                                        repaint: _repaint,
+                                    ),
+                                    painter: SliderPainter(
+                                        color: widget.sliderBackgroundColor,
+                                        maxSize: Size(widget.sliderWidth, widget.sliderHeight),
+                                    ),
                                 ),
                             ),
                         ),
