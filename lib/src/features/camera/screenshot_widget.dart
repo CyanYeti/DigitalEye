@@ -51,22 +51,20 @@ class _ScreenshotWidgetState extends State<ScreenshotWidget> {
 
     @override
     Widget build(BuildContext context) {
-        return Column(
+        final Size screenSize = MediaQuery.of(context).size;
+        return Stack(
             children: [
-                Expanded(
-                    child: Screenshot(
-                        controller: ssController,
-                        child: PosterizeWidget(),
-                    ),
+                Screenshot(
+                    controller: ssController,
+                    child: PosterizeWidget(),
                 ),
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                        FloatingActionButton(
-                            onPressed: () => captureScreenshot(),
-                            child: Icon(Icons.camera),
-                        ),
-                    ],
+                Positioned(
+                    bottom: 10,
+                    left: screenSize.width / 2,
+                    child: FloatingActionButton(
+                        onPressed: () => captureScreenshot(),
+                        child: Icon(Icons.camera),
+                    ),
                 ),
             ],
         );
