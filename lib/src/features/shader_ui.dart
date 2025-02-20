@@ -41,6 +41,17 @@ class ShaderUI extends ConsumerWidget {
     ShaderUI ({super.key});
 
     FloatingButtonController contrastController = FloatingButtonController();
+    FloatingButtonController saturationController = FloatingButtonController();
+
+    void resetAll(WidgetRef ref) {
+        ref.read(shaderProvider.notifier).setDefaultShaderSettings();
+        //reset contrast
+        contrastController.updatePositionByPercent?.call(ref.read(shaderProvider.notifier).state['contrast/level'] / 2);
+        contrastController.updateOption?.call(0);
+        //reset saturation
+        saturationController.updatePositionByPercent?.call(ref.read(shaderProvider.notifier).state['saturation/level'] / 2);
+        saturationController.updateOption?.call(0);
+    }
 
     @override
     Widget build(BuildContext context, WidgetRef ref) {
@@ -55,7 +66,7 @@ class ShaderUI extends ConsumerWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                                 FloatingActionButton(
-                                    onPressed: () => ref.read(shaderProvider.notifier).setDefaultShaderSettings(),
+                                    onPressed: () => resetAll(ref),
                                     child: Icon(Icons.restart_alt),
                                 ),
                                 FloatingActionButton(
@@ -128,12 +139,6 @@ class ShaderUI extends ConsumerWidget {
                         children: [
                             FloatingButton(
                                 sliderStartPos: 0.5,
-                                onChanged: (val) {
-                                    ref.read(shaderProvider.notifier).updateShaderSetting('contrast/level', 2 * val);
-                                },
-                            ),
-                            FloatingButton(
-                                sliderStartPos: 0.5,
                                 toggleIcons: [Icon(Icons.ac_unit), Icon(Icons.add), Icon(Icons.adjust), Icon(Icons.airline_stops)],
                                 onTap: (option) {
                                     double newSettingPercent = 1.0;
@@ -160,6 +165,31 @@ class ShaderUI extends ConsumerWidget {
                                     contrastController.updateOption?.call(0); //reset icon to default, could be any but 0 is best
                                 },
                                 controller: contrastController,
+                            ),
+                            FloatingButton(
+                                sliderStartPos: 0.5,
+                                toggleIcons: [Icon(Icons.color_lens), Icon(Icons.color_lens_outlined), Icon(Icons.color_lens, color: Colors.yellowAccent)],
+                                onTap: (option) {
+                                    double newSettingPercent = 1.0;
+                                    switch (option) {
+                                        case 0:
+                                            newSettingPercent = 1.0;
+                                            break;
+                                        case 1:
+                                            newSettingPercent = 0.0;
+                                            break;
+                                        case 2:
+                                            newSettingPercent = 2.0;
+                                            break;
+                                    }
+                                    ref.read(shaderProvider.notifier).updateShaderSetting('saturation/level', newSettingPercent);
+                                    saturationController.updatePositionByPercent?.call(newSettingPercent / 2);
+                                },
+                                onChanged: (val) {
+                                    ref.read(shaderProvider.notifier).updateShaderSetting('saturation/level', 2 * val);
+                                    saturationController.updateOption?.call(0);
+                                },
+                                controller: saturationController,
                             ),
                         ],
                     ),
