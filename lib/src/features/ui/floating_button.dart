@@ -6,18 +6,34 @@ import 'package:flutter/widgets.dart';
 class FloatingButton extends StatefulWidget {
     final double sliderWidth;
     final double sliderHeight;
+    final double sliderStartPos;
     final ValueChanged<double> onChanged;
-    VoidCallback? onTap;
-    int? toggleCount;
-    List<dynamic>? toggleIcons;
+    final Color sliderColor;
+    final Color sliderBackgroundColor;
+    final Function(int)? onTap;
+    final Function()? onDrag;
+    final List<dynamic> toggleIcons;
+    final FloatingButtonController? controller;
 
     FloatingButton({
-        this.sliderWidth = 100,
+        this.sliderWidth = 50,
         this.sliderHeight = 300,
+        this.sliderStartPos = 1.0,
+        this.sliderColor = Colors.orange,
+        this.sliderBackgroundColor = Colors.blueGrey,
+        this.onTap,
+        this.onDrag,
+        this.toggleIcons = const <dynamic>[],
+        this.controller,
         required this.onChanged,
     });
     @override
     _FloatingButtonState createState() => _FloatingButtonState();
+}
+
+class FloatingButtonController {
+    void Function(double percent)? updatePositionByPercent;
+    void Function(int option)? updateOption;
 }
 
 class _FloatingButtonState extends State<FloatingButton> {
@@ -28,7 +44,20 @@ class _FloatingButtonState extends State<FloatingButton> {
     double _dragPosition = 0.0;
     double _dragPercentage = 0.0;
     bool _isDragging = false; //Prevent closing if starting button signals closing
+    Offset _dragDiff = Offset.zero;
     ChangeNotifier _repaint = ChangeNotifier();
+
+    // Cycle button
+    int currentOption = 0;
+
+    @override
+    void initState() {
+        super.initState();
+        _dragPosition = widget.sliderHeight * widget.sliderStartPos;
+        _dragPercentage = widget.sliderStartPos;
+        widget.controller?.updateOption = _updateOption;
+        widget.controller?.updatePositionByPercent = _updatePositionByPercent;
+    }
 
     _handleChanged(double val) {
         assert(widget.onChanged != null);
@@ -36,13 +65,13 @@ class _FloatingButtonState extends State<FloatingButton> {
     }
 
     void _updateDragPosition(Offset val) {
-        double newDragPosition = 0.0;
-        if (val.dy <= 0.0) {
+        _dragDiff = _dragDiff - val;
+
+        double newDragPosition = _dragPosition - _dragDiff.dy;
+        if (newDragPosition <= 0.0) {
             newDragPosition = 0.0;
-        } else if (val.dy >= widget.sliderHeight) {
+        } else if (newDragPosition >= widget.sliderHeight) {
             newDragPosition = widget.sliderHeight;
-        } else {
-            newDragPosition = val.dy;
         }
 
         setState(() {
@@ -51,14 +80,34 @@ class _FloatingButtonState extends State<FloatingButton> {
             _repaint.notifyListeners();
         });
 
+        _dragDiff = val;
+
         entry?.markNeedsBuild();
 
+    }
+    
+    void _updatePositionByPercent(double percent) {
+        if (percent < 0.0) {
+            percent = 0.0;
+        } else if (percent > 1.0) {
+            percent = 1.0;
+        }
+
+        setState(() {
+            _dragPosition = widget.sliderHeight * percent;
+            _dragPercentage = percent;
+            _repaint.notifyListeners();
+        });
+
+        entry?.markNeedsBuild();
     }
 
     void _onDragStart(BuildContext context, DragStartDetails details) {
         RenderBox box = context.findRenderObject() as RenderBox;
         Offset localOffset = box.globalToLocal(details.globalPosition);
+        _dragDiff = localOffset;
         _updateDragPosition(localOffset);
+        widget.onDrag?.call();
         _isDragging = true;
     }
 
@@ -96,14 +145,14 @@ class _FloatingButtonState extends State<FloatingButton> {
                             //child: Image.asset('assets/Gradient.png'),
                             child: CustomPaint(
                                 foregroundPainter: SliderBarPainter(
-                                    color: Colors.red,
+                                    color: widget.sliderColor,
                                     sliderPosition: _dragPosition,
                                     dragPercentage: _dragPercentage,
                                     width: widget.sliderWidth,
                                     repaint: _repaint,
                                 ),
                                 painter: SliderPainter(
-                                    color: Colors.grey,
+                                    color: widget.sliderBackgroundColor,
                                     maxSize: Size(widget.sliderWidth, widget.sliderHeight),
                                 ),
                             ),
@@ -114,6 +163,25 @@ class _FloatingButtonState extends State<FloatingButton> {
         );
         final overlay = Overlay.of(context)!;
         overlay.insert(entry!);
+    }
+
+    void _handleOnTap() {
+        _updateOption(currentOption + 1);
+        
+        widget.onTap?.call(currentOption);
+
+        setState(() {});
+        
+    }
+    void _updateOption(option) {
+        currentOption = option;
+        int totalOptions = widget.toggleIcons.length;
+        if (totalOptions == 0 || currentOption > totalOptions) {
+            currentOption = 0;
+        } else {
+            currentOption = currentOption % totalOptions;
+        }
+        setState(() {});
     }
 
     void hideOverlay(BuildContext context) {
@@ -131,9 +199,10 @@ class _FloatingButtonState extends State<FloatingButton> {
             //onTapDown: (details) => {showOverlay(context)},
             //onTapUp: (details) => {hideOverlay(context)},
             //onTapCancel: () => {hideOverlay(context)},
+            onTap: () => {_handleOnTap()},
             onLongPress: () => {showOverlay(context)},
             onLongPressCancel: () => {hideOverlay(context)},
-            child: Icon(Icons.visibility),
+            child: widget.toggleIcons.isEmpty ? Icon(Icons.visibility) : widget.toggleIcons[currentOption],
         );
     }
 }

@@ -38,7 +38,9 @@ class ShaderState extends StateNotifier<Map<String, dynamic>> {
 final shaderProvider = StateNotifierProvider<ShaderState, Map<String, dynamic>>((ref) => ShaderState());
 
 class ShaderUI extends ConsumerWidget {
-    const ShaderUI ({super.key});
+    ShaderUI ({super.key});
+
+    FloatingButtonController contrastController = FloatingButtonController();
 
     @override
     Widget build(BuildContext context, WidgetRef ref) {
@@ -124,9 +126,41 @@ class ShaderUI extends ConsumerWidget {
                     Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                            FloatingButton(onChanged: (val) {
-                                ref.read(shaderProvider.notifier).updateShaderSetting('contrast/level', val);
-                            }),
+                            FloatingButton(
+                                sliderStartPos: 0.5,
+                                onChanged: (val) {
+                                    ref.read(shaderProvider.notifier).updateShaderSetting('contrast/level', 2 * val);
+                                },
+                            ),
+                            FloatingButton(
+                                sliderStartPos: 0.5,
+                                toggleIcons: [Icon(Icons.ac_unit), Icon(Icons.add), Icon(Icons.adjust), Icon(Icons.airline_stops)],
+                                onTap: (option) {
+                                    double newSettingPercent = 1.0;
+                                    switch (option) {
+                                        case 0:
+                                            newSettingPercent = 1.0;
+                                            break;
+                                        case 1:
+                                            newSettingPercent = 0.0;
+                                            break;
+                                        case 2:
+                                            newSettingPercent = 0.5;
+                                            break;
+                                        case 3:
+                                            newSettingPercent = 1.5;
+                                            break;
+                                    }
+                                    ref.read(shaderProvider.notifier).updateShaderSetting('contrast/level', newSettingPercent);
+                                    contrastController.updatePositionByPercent?.call(newSettingPercent / 2);
+
+                                },
+                                onChanged: (val) {
+                                    ref.read(shaderProvider.notifier).updateShaderSetting('contrast/level', 2 * val);
+                                    contrastController.updateOption?.call(0); //reset icon to default, could be any but 0 is best
+                                },
+                                controller: contrastController,
+                            ),
                         ],
                     ),
                     Expanded(
