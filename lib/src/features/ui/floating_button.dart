@@ -13,6 +13,7 @@ class FloatingButton extends StatefulWidget {
     final Function(int)? onTap;
     final Function()? onDrag;
     final List<dynamic> toggleIcons;
+    final double? steps;
     final FloatingButtonController? controller;
 
     FloatingButton({
@@ -25,6 +26,7 @@ class FloatingButton extends StatefulWidget {
         this.onDrag,
         this.toggleIcons = const <dynamic>[],
         this.controller,
+        this.steps,
         required this.onChanged,
     });
     @override
@@ -123,6 +125,13 @@ class _FloatingButtonState extends State<FloatingButton> {
         hideOverlay(context);
     }
 
+    double _roundToSteps(double input, double steps, double maxValue) {
+        double stepSize = maxValue / (steps - 1);
+        double roundedPosition = (input / stepSize).round().toDouble();
+        roundedPosition = roundedPosition * stepSize;
+        return roundedPosition;
+    }
+
     void showOverlay(BuildContext context) {
         RenderBox box = baseKey.currentContext?.findRenderObject() as RenderBox;
         Offset position = box.localToGlobal(Offset.zero);
@@ -147,8 +156,12 @@ class _FloatingButtonState extends State<FloatingButton> {
                                 child: CustomPaint(
                                     foregroundPainter: SliderBarPainter(
                                         color: widget.sliderColor,
-                                        sliderPosition: _dragPosition,
-                                        dragPercentage: _dragPercentage,
+                                        //sliderPosition: _dragPosition,
+                                        sliderPosition: (widget.steps != null && widget.steps! > 0.0) ? 
+                                            _roundToSteps(_dragPosition, widget.steps!, widget.sliderHeight) : _dragPosition,
+                                        dragPercentage: (widget.steps != null && widget.steps! > 0.0) ? 
+                                            _roundToSteps(_dragPercentage, widget.steps!, 1.0) : _dragPercentage,
+                                        //dragPercentage: _dragPercentage,
                                         width: widget.sliderWidth,
                                         repaint: _repaint,
                                     ),

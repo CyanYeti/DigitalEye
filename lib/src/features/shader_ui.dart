@@ -42,6 +42,8 @@ class ShaderUI extends ConsumerWidget {
 
     FloatingButtonController contrastController = FloatingButtonController();
     FloatingButtonController saturationController = FloatingButtonController();
+    FloatingButtonController posterizeController = FloatingButtonController();
+    final double posterizeSteps = 10.0; // Posterize starts at 2 value, so ten steps would give 2 -> 11
     final double leftPaddingSliders = 15;
     final double columnPadding = 10;
 
@@ -72,6 +74,7 @@ class ShaderUI extends ConsumerWidget {
                     left: leftPaddingSliders,
                     child: Column(
                         children: [
+                            // Contrast Slider
                             FloatingButton(
                                 sliderStartPos: 0.5,
                                 toggleIcons: [Icon(Icons.ac_unit), Icon(Icons.add), Icon(Icons.adjust), Icon(Icons.airline_stops)],
@@ -101,7 +104,10 @@ class ShaderUI extends ConsumerWidget {
                                 },
                                 controller: contrastController,
                             ),
+
                             SizedBox(height: columnPadding),
+
+                            // Saturation Slider
                             FloatingButton(
                                 sliderStartPos: 0.5,
                                 toggleIcons: [Icon(Icons.color_lens), Icon(Icons.color_lens_outlined), Icon(Icons.color_lens, color: Colors.yellowAccent)],
@@ -127,6 +133,64 @@ class ShaderUI extends ConsumerWidget {
                                 },
                                 controller: saturationController,
                             ),
+
+                            SizedBox(height: columnPadding),
+
+                            // Brightness Slider
+                            FloatingButton(
+                                sliderStartPos: 0.5,
+                                onChanged: (val) {
+                                    ref.read(shaderProvider.notifier).updateShaderSetting('brightness/level', 2 * val);
+                                }
+                            ),
+
+                            SizedBox(height: columnPadding),
+
+                            // Posterize slider
+                            FloatingButton(
+                                sliderStartPos: 0.0,
+                                steps: posterizeSteps,
+                                toggleIcons: [
+                                    Icon(Icons.expand_sharp), 
+                                    Icon(Icons.looks_two_rounded),
+                                    Icon(Icons.looks_3_rounded),
+                                    Icon(Icons.looks_5_rounded),
+                                    Icon(Icons.nine_k),
+                                ],
+                                onTap: (option) {
+                                    double steps = 0.0;
+                                    switch (option) {
+                                        case 0:
+                                            ref.read(shaderProvider.notifier).updateShaderSetting('posterize/toRender', false);
+                                            break;
+                                        case 1:
+                                            steps = 1.0;
+                                            break;
+                                        case 2:
+                                            steps = 2.0;
+                                            break;
+                                        case 3:
+                                            steps = 4.0;
+                                            break;
+                                        case 4:
+                                            steps = 8.0;
+                                            break;
+                                    }
+                                    if (steps != 0.0) {
+                                        ref.read(shaderProvider.notifier).updateShaderSetting('posterize/toRender', true);
+                                        ref.read(shaderProvider.notifier).updateShaderSetting('posterize/steps', steps);
+                                        posterizeController.updatePositionByPercent?.call(((steps - 1) / (posterizeSteps - 1)).toDouble());
+                                    }
+                                },
+                                onChanged: (val) {
+                                    double steps = (val * (posterizeSteps - 1) + 1).round().toDouble();
+                                    ref.read(shaderProvider.notifier).updateShaderSetting('posterize/toRender', true);
+                                    ref.read(shaderProvider.notifier).updateShaderSetting('posterize/steps', steps);
+                                },
+                                controller: posterizeController,
+                            ),
+
+                            
                         ],
                     ),
                 ),
