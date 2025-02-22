@@ -8,6 +8,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 
+enum ImageMode { play, pause }
 
 // This is just to provide the stream with the render objects key.
 final screenshotGlobalKeyProvider = Provider<GlobalKey>((ref) {

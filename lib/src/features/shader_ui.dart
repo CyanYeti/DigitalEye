@@ -7,6 +7,7 @@ import './ui/floating_button.dart';
 import './ui/color_picker.dart';
 import './camera/camera_widget.dart';
 import './camera/screenshot_widget.dart';
+import './camera/camera_mode_widget.dart';
 
 class ShaderState extends StateNotifier<Map<String, dynamic>> {
     ShaderState() : super({}) {
@@ -59,6 +60,28 @@ class ShaderUI extends ConsumerWidget {
         saturationController.updateOption?.call(0);
     }
 
+    void _toggleCameraFeed(WidgetRef ref) {
+        final ImageMode imageMode = ref.read(imageStreamerModeProvider);
+        if (imageMode == ImageMode.still) {
+            _startCameraFeed(ref);
+        } else {
+            _pauseCameraFeed(ref);
+        }
+
+    }
+
+    void _pauseCameraFeed(WidgetRef ref) {
+        ref.read(imageStreamerModeProvider.state).state = ImageMode.still;
+    }
+
+    void _startCameraFeed(WidgetRef ref) {
+        ref.read(imageStreamerModeProvider.state).state = ImageMode.camera;
+    }
+
+    void _startImageSelect(WidgetRef ref) {
+        ref.read(imageStreamerModeProvider.state).state = ImageMode.select;
+    }
+
     @override
     Widget build(BuildContext context, WidgetRef ref) {
         final shaderSettings = ref.watch(shaderProvider);
@@ -76,17 +99,35 @@ class ShaderUI extends ConsumerWidget {
                         children: [
                             FloatingActionButton(
                                 onPressed: () => resetAll(ref),
-                                child: Icon(Icons.restart_alt),
+                                child: Icon(Icons.swap_horiz),
+                            ),
+                            SizedBox(height: columnPadding),
+                            FloatingActionButton(
+                                onPressed: () => resetAll(ref),
+                                child: Icon(Icons.swap_vert),
                             ),
                             SizedBox(height: columnPadding),
                             FloatingActionButton(
                                 onPressed: () => resetAll(ref),
                                 child: Icon(Icons.restart_alt),
                             ),
+                        ],
+                    ),
+                ),
+                // Pause camera and select from files
+                Positioned(
+                    bottom: edgePadding,
+                    left: edgePadding,
+                    child: Column(
+                        children: [
+                            FloatingActionButton(
+                                onPressed: () {_toggleCameraFeed(ref);},
+                                child: Icon(Icons.pause_circle),
+                            ),
                             SizedBox(height: columnPadding),
                             FloatingActionButton(
-                                onPressed: () => resetAll(ref),
-                                child: Icon(Icons.restart_alt),
+                                onPressed: () {_startImageSelect(ref);},
+                                child: Icon(Icons.file_open),
                             ),
                         ],
                     ),
@@ -227,153 +268,5 @@ class ShaderUI extends ConsumerWidget {
             ],
         );
     }
-
-    //@override
-    //Widget build(BuildContext context, WidgetRef ref) {
-    //    final shaderSettings = ref.watch(shaderProvider);
-    //    return Scaffold(
-    //        body: Column(
-    //            children: [
-    //                // posterize toggle and slider
-    //                Padding(
-    //                    padding: EdgeInsets.all(16.0),
-    //                    child: Row(
-    //                        mainAxisAlignment: MainAxisAlignment.center,
-    //                        children: [
-    //                            FloatingActionButton(
-    //                                onPressed: () => resetAll(ref),
-    //                                child: Icon(Icons.restart_alt),
-    //                            ),
-    //                            FloatingActionButton(
-    //                                onPressed: () => ref.read(shaderProvider.notifier).toggleBoolShaderSetting('posterize/toRender'),
-    //                                child: Icon(Icons.compare_rounded),
-    //                            ),
-    //                            Slider(
-    //                                value: ref.read(shaderProvider.notifier).state['posterize/steps'],
-    //                                max: 11.0,
-    //                                min: 1.0,
-    //                                divisions: 10,
-    //                                label: ref.read(shaderProvider.notifier).state['posterize/steps'].toString(),
-    //                                onChanged: (double value) {
-    //                                    ref.read(shaderProvider.notifier).updateShaderSetting('posterize/steps', value);
-    //                                },
-    //                            ),
-    //                        ],
-    //                    ),
-    //                ),
-    //                // saturation slider
-    //                Row(
-    //                    mainAxisAlignment: MainAxisAlignment.center,
-    //                    children: [
-    //                        Text("saturation"),
-    //                        Slider(
-    //                            value: ref.read(shaderProvider.notifier).state['saturation/level'],
-    //                            max: 2.0,
-    //                            divisions: 200,
-    //                            label: ref.read(shaderProvider.notifier).state['saturation/level'].toString(),
-    //                            onChanged: (double value) {
-    //                                ref.read(shaderProvider.notifier).updateShaderSetting('saturation/level', value);
-    //                            },
-    //                        ),
-    //                    ],
-    //                ),
-    //                // brightness slider
-    //                Row(
-    //                    mainAxisAlignment: MainAxisAlignment.center,
-    //                    children: [
-    //                        Text("brightness"),
-    //                        Slider(
-    //                            value: ref.read(shaderProvider.notifier).state['brightness/level'],
-    //                            max: 2.0,
-    //                            divisions: 200,
-    //                            label: ref.read(shaderProvider.notifier).state['brightness/level'].toString(),
-    //                            onChanged: (double value) {
-    //                                ref.read(shaderProvider.notifier).updateShaderSetting('brightness/level', value);
-    //                            },
-    //                        ),
-    //                    ],
-    //                ),
-    //                // contrast slider
-    //                Row(
-    //                    mainAxisAlignment: MainAxisAlignment.center,
-    //                    children: [
-    //                        Text("contrast"),
-    //                        Slider(
-    //                            value: ref.read(shaderProvider.notifier).state['contrast/level'],
-    //                            max: 2.0,
-    //                            divisions: 200,
-    //                            label: ref.read(shaderProvider.notifier).state['contrast/level'].toString(),
-    //                            onChanged: (double value) {
-    //                                ref.read(shaderProvider.notifier).updateShaderSetting('contrast/level', value);
-    //                            },
-    //                        ),
-    //                    ],
-    //                ),
-    //                Row(
-    //                    mainAxisAlignment: MainAxisAlignment.center,
-    //                    children: [
-    //                        FloatingButton(
-    //                            sliderStartPos: 0.5,
-    //                            toggleIcons: [Icon(Icons.ac_unit), Icon(Icons.add), Icon(Icons.adjust), Icon(Icons.airline_stops)],
-    //                            onTap: (option) {
-    //                                double newSettingPercent = 1.0;
-    //                                switch (option) {
-    //                                    case 0:
-    //                                        newSettingPercent = 1.0;
-    //                                        break;
-    //                                    case 1:
-    //                                        newSettingPercent = 0.0;
-    //                                        break;
-    //                                    case 2:
-    //                                        newSettingPercent = 0.5;
-    //                                        break;
-    //                                    case 3:
-    //                                        newSettingPercent = 1.5;
-    //                                        break;
-    //                                }
-    //                                ref.read(shaderProvider.notifier).updateShaderSetting('contrast/level', newSettingPercent);
-    //                                contrastController.updatePositionByPercent?.call(newSettingPercent / 2);
-
-    //                            },
-    //                            onChanged: (val) {
-    //                                ref.read(shaderProvider.notifier).updateShaderSetting('contrast/level', 2 * val);
-    //                                contrastController.updateOption?.call(0); //reset icon to default, could be any but 0 is best
-    //                            },
-    //                            controller: contrastController,
-    //                        ),
-    //                        FloatingButton(
-    //                            sliderStartPos: 0.5,
-    //                            toggleIcons: [Icon(Icons.color_lens), Icon(Icons.color_lens_outlined), Icon(Icons.color_lens, color: Colors.yellowAccent)],
-    //                            onTap: (option) {
-    //                                double newSettingPercent = 1.0;
-    //                                switch (option) {
-    //                                    case 0:
-    //                                        newSettingPercent = 1.0;
-    //                                        break;
-    //                                    case 1:
-    //                                        newSettingPercent = 0.0;
-    //                                        break;
-    //                                    case 2:
-    //                                        newSettingPercent = 2.0;
-    //                                        break;
-    //                                }
-    //                                ref.read(shaderProvider.notifier).updateShaderSetting('saturation/level', newSettingPercent);
-    //                                saturationController.updatePositionByPercent?.call(newSettingPercent / 2);
-    //                            },
-    //                            onChanged: (val) {
-    //                                ref.read(shaderProvider.notifier).updateShaderSetting('saturation/level', 2 * val);
-    //                                saturationController.updateOption?.call(0);
-    //                            },
-    //                            controller: saturationController,
-    //                        ),
-    //                    ],
-    //                ),
-    //                Expanded(
-    //                    child: ScreenshotWidget(),
-    //                ),
-    //            ],
-    //        ),
-    //    );
-    //}
 }
 

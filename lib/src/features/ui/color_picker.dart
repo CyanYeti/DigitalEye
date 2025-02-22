@@ -316,7 +316,7 @@ class ColorPicker extends ConsumerWidget {
                                                         onPressed: () {
                                                             ref.read(colorPickerProvider.notifier).updateColorPickerSetting("pickerMode", ColorPickerMode.area);
                                                         },
-                                                        child: Icon(Icons.visibility),
+                                                        child: Icon(Icons.auto_mode),
                                                     ),
                                                 ),
                                                 Positioned(
@@ -327,7 +327,7 @@ class ColorPicker extends ConsumerWidget {
                                                             final data = await _findClosestColorData(pickedColor, ref.read(colorPickerProvider.notifier).state["colorSet"]);
                                                             _launchWikiURL(data["wiki_link"]);
                                                         },
-                                                        child: Icon(Icons.visibility),
+                                                        child: Icon(Icons.web),
                                                     ),
                                                 ),
                                             ],
@@ -346,46 +346,4 @@ class ColorPicker extends ConsumerWidget {
             ),
         );
     }
-    //@override
-    //Widget build(BuildContext context, WidgetRef ref) {
-    //    //final imageStream = ref.watch(cameraImageProvider);
-    //    final imageStream = ref.watch(screenImageProvider);
-    //    final Size size = MediaQuery.of(context).size;
-    //    Color? pickedColor = null;
-    //    return SizedBox(
-    //        width: size.width,
-    //        height: boxHeight,
-    //        child: Builder (
-    //            builder: (BuildContext context) {
-    //                imageStream.when(
-    //                    data: (imageBytes) => {pickedColor = _findColorAt(imageBytes)},
-    //                    loading: () => {pickedColor = Colors.grey},
-    //                    error: (error, stack) => {debugPrint("Stream Error: $error")}
-    //                );
-
-    //                return ColoredBox(
-    //                    color: (pickedColor != null) ? pickedColor! : Colors.grey,
-    //                    child: FittedBox(
-    //                        fit: BoxFit.fitHeight,
-    //                        child: Padding(
-    //                            padding: EdgeInsets.all(5.0),
-    //                            child: Center(
-    //                                child: DefaultTextStyle(
-    //                                    style: TextStyle(color: Colors.white),
-    //                                    child: Column(
-    //                                        children: [
-    //                                            Text("Blue", style: TextStyle(color: _findComplementaryColor(pickedColor!), fontSize: 15.0)),
-    //                                            Text(_colorHexCode(pickedColor), style: TextStyle(color: _findBWComplement(pickedColor!), fontSize: 4.0)),
-    //                                        ],
-    //                                    ),
-    //                                ),
-    //                            ),
-    //                        ),
-    //                    ),
-    //                );
-    //            }
-    //        ), 
-    //    );
-    //}
-
 }

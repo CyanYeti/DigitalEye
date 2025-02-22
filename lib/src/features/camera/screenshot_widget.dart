@@ -61,7 +61,7 @@ class _ScreenshotWidgetState extends State<ScreenshotWidget> {
                 ),
                 Positioned(
                     bottom: 10,
-                    left: screenSize.width / 2,
+                    left: screenSize.width / 2 - 25,
                     child: FloatingActionButton(
                         onPressed: () => captureScreenshot(),
                         child: Icon(Icons.camera),

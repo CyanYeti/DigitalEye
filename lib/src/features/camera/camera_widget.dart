@@ -4,6 +4,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter/widgets.dart';
 
 class CameraImageState extends StateNotifier<Map<String, CameraImage>> {
   CameraImageState() : super({}) {}
@@ -23,7 +24,7 @@ class CameraWidget extends ConsumerStatefulWidget {
   ConsumerState<CameraWidget> createState() => _CameraWidgetState();
 }
 
-class _CameraWidgetState extends ConsumerState<CameraWidget> {
+class _CameraWidgetState extends ConsumerState<CameraWidget> with WidgetsBindingObserver {
   // get list of cameras async
   final Future<List<CameraDescription>> _camerasFuture = availableCameras();
   CameraController? controller;
@@ -31,10 +32,14 @@ class _CameraWidgetState extends ConsumerState<CameraWidget> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance!.addObserver(this);
     _initializeCameraController();
   }
 
   void _initializeCameraController() {
+    if (!mounted) {
+      return;
+    }
     //start pulling camera data on init
     _camerasFuture.then((cameras) {
       controller = CameraController(cameras[0], ResolutionPreset.max);
@@ -52,7 +57,9 @@ class _CameraWidgetState extends ConsumerState<CameraWidget> {
 
   @override
   void dispose() {
+    controller?.stopImageStream();
     controller?.dispose();
+    WidgetsBinding.instance!.removeObserver(this);
     super.dispose();
   }
 

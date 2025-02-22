@@ -189,37 +189,6 @@ class CameraPageState extends State<CameraPage> with WidgetsBindingObserver {
           ),
         )
       );
-      //return SafeArea(
-      //  child: Scaffold(
-      //    body: Column(
-      //      children: [
-      //        //cameraWidget(context),
-      //        CameraPreview(_controller!),
-      //        const SizedBox(
-      //          height: 10,
-      //        ),
-      //        Row(
-      //          mainAxisAlignment: MainAxisAlignment.center,
-      //          children: [
-      //            if (!_isRecording)
-      //              ElevatedButton(
-      //                onPressed: _onTakePhotoPressed,
-      //                style: ElevatedButton.styleFrom(
-      //                    fixedSize: const Size(70, 70),
-      //                    shape: const CircleBorder(),
-      //                    backgroundColor: Colors.white),
-      //                child: const Icon(
-      //                  Icons.camera_alt,
-      //                  color: Colors.black,
-      //                  size: 30,
-      //                ),
-      //              ),
-      //          ],
-      //        ),
-      //      ],
-      //    ),
-      //  ),
-      //);
     } else {
       return const Center(
         child: CircularProgressIndicator(),

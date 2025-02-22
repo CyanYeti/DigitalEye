@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_shaders/flutter_shaders.dart';
-import '../camera/camera_widget.dart';
+import '../camera/camera_mode_widget.dart';
 import '../shader_ui.dart';
 
 class SaturationWidget extends ConsumerWidget {
@@ -14,7 +14,6 @@ class SaturationWidget extends ConsumerWidget {
     @override
     Widget build(BuildContext context, WidgetRef ref) {
         final shaderSettings = ref.watch(shaderProvider);
-        final cameraImage = ref.watch(cameraImageProvider);
 
         return Builder(
             builder: (context) {
@@ -31,7 +30,7 @@ class SaturationWidget extends ConsumerWidget {
                         },
                         // Static image to test shaders independent of camera
                         //child: Image.asset('assets/test_image.jpg'),
-                        child: CameraWidget(),
+                        child: CameraModeWidget(),
                     ),
                 );
             }
