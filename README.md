@@ -4,7 +4,7 @@ A simple camera app to quickly apply common filters for artists and colorblind. 
 
 ## Running
 
-Currently this is a simple flutter app. Due to an issue with impeller, run with:
+Currently this is just a flutter app. Run with:
 ```
 flutter run
 ```
@@ -19,7 +19,7 @@ flutter run
 | Contrast    | :heavy_check_mark:|
 | Brightness    | :heavy_check_mark:|
 | Exposure    | :heavy_multiplication_x:|
-| ColorPicker    | :heavy_multiplication_x:|
+| ColorPicker    | :heavy_check_mark:|
 | ColorPickerArea    | :heavy_multiplication_x:|
 | ColorPickerSmartArea | :heavy_multiplication_x:|
 | ColorPickerSmartScreen | :heavy_multiplication_x:|
@@ -35,6 +35,12 @@ flutter run
 
 ## Known Issues
 -Currently not working with new impeller renderer.
+
 -ndk version mismatch
+
 -The gallery opens to an error on some Android/Samsung devices due to Gal.open() bug
+
+-Brief error flash on camera resume from inactivity
+
+-Camera still breaks on shader update
 
