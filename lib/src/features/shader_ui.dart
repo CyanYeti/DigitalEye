@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:screenshot/screenshot.dart';
 import './filters/posterize_widget.dart';
 import './ui/floating_button.dart';
+import './ui/color_picker.dart';
 import './camera/camera_widget.dart';
 import './camera/screenshot_widget.dart';
 
@@ -45,6 +46,7 @@ class ShaderUI extends ConsumerWidget {
     FloatingButtonController posterizeController = FloatingButtonController();
     final double posterizeSteps = 10.0; // Posterize starts at 2 value, so ten steps would give 2 -> 11
     final double leftPaddingSliders = 15;
+    final double edgePadding = 15;
     final double columnPadding = 10;
 
     void resetAll(WidgetRef ref) {
@@ -66,8 +68,36 @@ class ShaderUI extends ConsumerWidget {
             children: [
                 // Camera and filter stack
                 ScreenshotWidget(),
-                // flip controls
+                // flip and reset controls
+                Positioned(
+                    bottom: edgePadding,
+                    right: edgePadding,
+                    child: Column(
+                        children: [
+                            FloatingActionButton(
+                                onPressed: () => resetAll(ref),
+                                child: Icon(Icons.restart_alt),
+                            ),
+                            SizedBox(height: columnPadding),
+                            FloatingActionButton(
+                                onPressed: () => resetAll(ref),
+                                child: Icon(Icons.restart_alt),
+                            ),
+                            SizedBox(height: columnPadding),
+                            FloatingActionButton(
+                                onPressed: () => resetAll(ref),
+                                child: Icon(Icons.restart_alt),
+                            ),
+                        ],
+                    ),
+                ),
                 // Color picker
+                Positioned(
+                    top: 0,
+                    right: 0,
+                    left: 0,
+                    child: ColorPicker(),
+                ),
                 // Filter Slider UI
                 Positioned(
                     top: screenSize.height / 2,

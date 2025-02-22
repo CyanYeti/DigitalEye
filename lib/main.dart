@@ -10,6 +10,7 @@ import './src/features/shader_ui.dart';
 import 'dart:math';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 

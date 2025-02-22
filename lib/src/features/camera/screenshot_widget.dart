@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:gal/gal.dart';
 import '../filters/posterize_widget.dart';
+import './image_streamer_widget.dart';
 import 'dart:typed_data';
 
 class ScreenshotWidget extends StatefulWidget {
@@ -56,7 +57,7 @@ class _ScreenshotWidgetState extends State<ScreenshotWidget> {
             children: [
                 Screenshot(
                     controller: ssController,
-                    child: PosterizeWidget(),
+                    child: ImageStreamer(),
                 ),
                 Positioned(
                     bottom: 10,
