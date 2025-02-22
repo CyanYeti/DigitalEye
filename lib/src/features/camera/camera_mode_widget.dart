@@ -14,14 +14,25 @@ final imageModeGlobalKeyProvider = Provider<GlobalKey>((ref) {
     return GlobalKey();
 });
 
+final previousCapturedImageProvider = StateProvider<ui.Image?>((ref) => null);
 
 class CameraModeWidget extends ConsumerWidget {
 
-    Future<ui.Image> _pausedView(WidgetRef ref) async {
-        final globalKey = ref.read(imageModeGlobalKeyProvider);
-        final RenderRepaintBoundary boundary = globalKey.currentContext!.findRenderObject()! as RenderRepaintBoundary;
-        final ui.Image image = await boundary.toImage();
-        return image;
+    Future<ui.Image?> _pausedView(WidgetRef ref) async {
+        try {
+            final globalKey = ref.read(imageModeGlobalKeyProvider);
+            final RenderRepaintBoundary boundary = globalKey.currentContext!.findRenderObject()! as RenderRepaintBoundary;
+            final ui.Image image = await boundary.toImage();
+            ref.read(previousCapturedImageProvider.state).state = image;
+            return image;
+        } catch (e) {
+            final ui.Image? previousImage = ref.read(previousCapturedImageProvider);
+            if (previousImage != null) {
+                return previousImage;
+            } else {
+                debugPrint("Error capturing camera still in CameraModeWidget");
+            }
+        }
 
     }
 
@@ -40,11 +51,14 @@ class CameraModeWidget extends ConsumerWidget {
                             child: CameraWidget(),
                         );
                     case ImageMode.still:
-                        return FutureBuilder<ui.Image>(
+                        return FutureBuilder<ui.Image?>(
                             future: _pausedView(ref),
                             builder: (context, snapshot) {
+                                if (snapshot.data == null) {
+                                    return CircularProgressIndicator();
+                                }
                                 return RawImage(
-                                    image: snapshot.data,
+                                    image: snapshot.data!,
                                 );
                             },
                         );
