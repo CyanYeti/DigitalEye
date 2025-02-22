@@ -19,6 +19,9 @@ class ColorPickerState extends StateNotifier<Map<String, dynamic>> {
     }
 
     void setDefaultColorPickerSettings() {
+        _parseColorJson().then((colorSet) {
+            state = {...state, 'colorSet': colorSet};
+        });
         state = {
             'pickerMode': ColorPickerMode.simple,
             'previousColor': Colors.grey,
@@ -28,12 +31,43 @@ class ColorPickerState extends StateNotifier<Map<String, dynamic>> {
     void updateColorPickerSetting(String key, dynamic value) {
         state = {...state, key: value};
     }
+
+    Future<List<dynamic>> _parseColorJson() async {
+        final String data = await rootBundle.loadString('assets/colors.json');
+        final json = jsonDecode(data) as List<dynamic>;
+
+        return json;
+    }
 }
 
 final colorPickerProvider = StateNotifierProvider<ColorPickerState, Map<String, dynamic>>((ref) {
     return ColorPickerState();
 });
 
+class MutableColor {
+    int r = 0;
+    int g = 0;
+    int b = 0;
+    int a = 0;
+
+    MutableColor() {
+        this.r = 0;
+        this.g = 0;
+        this.b = 0;
+        this.a = 0;
+    }
+
+    MutableColor.withValues(int r, int g, int b, int a) {
+        this.r = r;
+        this.g = g;
+        this.b = b;
+        this.a = a;
+    }
+
+    Color toColor() {
+        return Color.fromARGB(a, r, g, b);
+    }
+}
 
 
 class ColorPicker extends ConsumerWidget {
@@ -41,6 +75,7 @@ class ColorPicker extends ConsumerWidget {
 
     final double boxHeight = 130;
 
+    // Util functions
     Color _findComplementaryColor(Color baseColor) {
         HSVColor baseHSV = HSVColor.fromColor(baseColor);
         Color compColor = HSVColor.fromAHSV(baseHSV.alpha, (baseHSV.hue + 180) % 360, baseHSV.saturation, 1.0).toColor();
@@ -56,18 +91,20 @@ class ColorPicker extends ConsumerWidget {
         return Colors.black;
     }
 
-    //Future<Color?> _findColorAtPosition(ui.Image image, WidgetRef ref) async {
-    //    return compute(_getPixelColor, image, ref);
-    //}
-
-    Color? _processImageForColor(Uint8List image, [Offset? target]) {
-        img.Image? imageProcessed = img.decodeImage(image);
-        if (imageProcessed != null) {
-            final pixel = imageProcessed.getPixel((imageProcessed.width / 2).toInt(), (imageProcessed.height / 2).toInt());
-            return Color.fromARGB(pixel.a.toInt(), pixel.r.toInt(), pixel.g.toInt(), pixel.b.toInt());
+    String _colorHexCode(Color? color) {
+        if (color == null) {
+            return "Loading";
         }
-        return null;
+        final String hexCode = '#${(color!.r * 255).round().toRadixString(16).padLeft(2, '0')}'
+                            '${(color!.g * 255).round().toRadixString(16).padLeft(2, '0')}'
+                            '${(color!.b * 255).round().toRadixString(16).padLeft(2, '0')}';
+
+
+        return hexCode;
+        
     }
+
+    // Gets the pixel info at target. If not target then middle
     Future<Color?> _getPixelColor(ui.Image image, WidgetRef ref, {Offset? target}) async {
         //final codec = await ui.instantiateImageCodec(imageBytes);
         //final frame = await codec.getNextFrame();
@@ -95,35 +132,66 @@ class ColorPicker extends ConsumerWidget {
         return foundColor;
     }
 
-    String _colorHexCode(Color? color) {
-        if (color == null) {
-            return "Loading";
+    // Get the average color over rect
+    Future<Color?> _getRectAverageColor(ui.Image image, WidgetRef ref, Offset pt1, Offset pt2) async {
+        final width = image.width;
+        final height = image.height;
+
+        final byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+        if (byteData == null) return null;
+        image.dispose();
+
+        int startIndex = ((pt1.dy.toInt() * width) + pt1.dx.toInt()) * 4;
+        int endIndex = ((pt2.dy.toInt() * width) + pt2.dx.toInt()) * 4;
+
+        MutableColor runningColor = MutableColor();
+        int pixelCount = 0;
+        for (int x = pt1.dx.toInt(); x < pt2.dx.toInt(); x++) {
+            for (int y = pt1.dy.toInt(); y < pt2.dy.toInt(); y++) {
+                int pixelIndex = ((y * width) + x) * 4;
+                
+                int r = byteData.getUint8(pixelIndex);
+                int g = byteData.getUint8(pixelIndex + 1);
+                int b = byteData.getUint8(pixelIndex + 2);
+                int a = byteData.getUint8(pixelIndex + 3);
+
+                runningColor.r += pow(r, 2).toInt();
+                runningColor.g += pow(g, 2).toInt();
+                runningColor.b += pow(b, 2).toInt();
+                runningColor.a += pow(a, 2).toInt();
+
+                pixelCount++;
+            }
         }
-        final String hexCode = '#${(color!.r * 255).round().toRadixString(16).padLeft(2, '0')}'
-                            '${(color!.g * 255).round().toRadixString(16).padLeft(2, '0')}'
-                            '${(color!.b * 255).round().toRadixString(16).padLeft(2, '0')}';
 
+        runningColor.r = sqrt(runningColor.r / pixelCount).round().toInt();
+        runningColor.g = sqrt(runningColor.g / pixelCount).round().toInt();
+        runningColor.b = sqrt(runningColor.b / pixelCount).round().toInt();
+        runningColor.a = sqrt(runningColor.a / pixelCount).round().toInt();
 
-        return hexCode;
-        
+        final Color foundColor = runningColor.toColor();
+
+        ref.read(colorPickerProvider.notifier).updateColorPickerSetting("previousColor", foundColor);
+        return foundColor;
     }
 
-    Future<String> _getColorName(Color? color) async {
-        if (color == null) {
+    // Find the closest name in a json set
+    Future<String> _getColorName(Color? color, List<dynamic>? colorSet) async {
+        if (color == null || colorSet == null) {
             return "Loading";
         }
 
         late String foundName = "Loading";
+        foundName =  await _findClosestName(color!, colorSet!);
 
-        await _parseColorJson().then((colorSet) {
-            foundName =  _findClosestName(color!, colorSet);
+        //await _parseColorJson().then((colorSet) {
 
-        });
+        //});
 
         return foundName;
     }
 
-    String _findClosestName(Color color, List<dynamic> colorSet) {
+    Future<String> _findClosestName(Color color, List<dynamic> colorSet) async {
         Map<String, dynamic> closestColorData = colorSet[0];
         double minDistance = 9999999;
         final int r1 = (color.r * 255).round().toInt();
@@ -145,12 +213,18 @@ class ColorPicker extends ConsumerWidget {
         return closestColorData["name"];
     }
 
-    //Future<Map<String, dynamic>> _parseColorJson() async {
-    Future<List<dynamic>> _parseColorJson() async {
-        final String data = await rootBundle.loadString('assets/colors.json');
-        final json = jsonDecode(data) as List<dynamic>;
-
-        return json;
+    Future<Color?> _selectMode(ui.Image image, WidgetRef ref, [Size? size]) async {
+        switch (ref.read(colorPickerProvider.notifier).state["pickerMode"]) {
+            case ColorPickerMode.simple:
+                return await _getPixelColor(image, ref);
+            case ColorPickerMode.area:
+                size ??= Size(200, 200);
+                return await _getRectAverageColor(image, 
+                    ref, 
+                    Offset(size.width ~/ 2 - 10, size.height ~/ 2 - 10),
+                    Offset(size.width ~/ 2 + 10, size.height ~/ 2 + 10)
+                );
+        }
     }
 
     @override
@@ -170,7 +244,7 @@ class ColorPicker extends ConsumerWidget {
                         data: (image) {
                             // While processing the stream, async/isolate process image data to get color
                             return FutureBuilder<Color?>(
-                                future: _getPixelColor(image, ref), 
+                                future: _selectMode(image, ref, size), 
                                 builder: (context, snapshot) {
                                     final Color pickedColor = snapshot.data ?? ref.read(colorPickerProvider.notifier).state["previousColor"];
     
@@ -185,17 +259,27 @@ class ColorPicker extends ConsumerWidget {
                                                         style: TextStyle(color: Colors.white),
                                                         child: Column(
                                                             children: [
-                                                                FutureBuilder(
-                                                                    future: _getColorName(pickedColor),
-                                                                    builder: (context, colorName) {
-                                                                        return Text(
-                                                                            colorName.data ?? "Loading...", 
-                                                                            style: TextStyle(
-                                                                                color: _findComplementaryColor(pickedColor), 
-                                                                                fontSize: 15.0
-                                                                            ),
-                                                                        );
-                                                                    },
+                                                                Row(
+                                                                    children: [
+                                                                        FutureBuilder(
+                                                                            future: _getColorName(pickedColor, ref.read(colorPickerProvider.notifier).state["colorSet"]),
+                                                                            builder: (context, colorName) {
+                                                                                return Text(
+                                                                                    colorName.data ?? "Loading...", 
+                                                                                    style: TextStyle(
+                                                                                        color: _findComplementaryColor(pickedColor), 
+                                                                                        fontSize: 15.0
+                                                                                    ),
+                                                                                );
+                                                                            },
+                                                                        ),
+                                                                        FloatingActionButton(
+                                                                            onPressed: () {
+                                                                                ref.read(colorPickerProvider.notifier).updateColorPickerSetting("pickerMode", ColorPickerMode.area);
+                                                                            },
+                                                                            child: Icon(Icons.visibility),
+                                                                        ),
+                                                                    ],
                                                                 ),
                                                                 Text(
                                                                     _colorHexCode(pickedColor), 
