@@ -20,7 +20,7 @@ final screenImageProvider = StreamProvider.autoDispose<ui.Image>((ref) async* {
 
     while (true) {
         // Throttle stream
-        await Future.delayed(Duration(milliseconds: 200));
+        await Future.delayed(Duration(milliseconds: 20));
         try {
             final RenderRepaintBoundary boundary = globalKey.currentContext!.findRenderObject()! as RenderRepaintBoundary;
             final ui.Image image = await boundary.toImage();

@@ -10,6 +10,7 @@ import 'dart:ui' as ui;
 import 'package:image/image.dart' as img;
 import 'package:flutter/services.dart' show rootBundle;
 import '../camera/image_streamer_widget.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 enum ColorPickerMode { simple, area }
 
@@ -25,6 +26,7 @@ class ColorPickerState extends StateNotifier<Map<String, dynamic>> {
         state = {
             'pickerMode': ColorPickerMode.simple,
             'previousColor': Colors.grey,
+            'currentColorData':  null,
         };
     }
 
@@ -74,6 +76,7 @@ class ColorPicker extends ConsumerWidget {
     const ColorPicker({super.key});
 
     final double boxHeight = 130;
+    final double edgePadding = 15;
 
     // Util functions
     Color _findComplementaryColor(Color baseColor) {
@@ -192,6 +195,10 @@ class ColorPicker extends ConsumerWidget {
     }
 
     Future<String> _findClosestName(Color color, List<dynamic> colorSet) async {
+        return await _findClosestColorData(color, colorSet).then((data) => data["name"]);
+    }
+
+    Future<Map<String, dynamic>> _findClosestColorData(Color color, List<dynamic> colorSet) async {
         Map<String, dynamic> closestColorData = colorSet[0];
         double minDistance = 9999999;
         final int r1 = (color.r * 255).round().toInt();
@@ -210,7 +217,7 @@ class ColorPicker extends ConsumerWidget {
             }
         });
 
-        return closestColorData["name"];
+        return closestColorData;
     }
 
     Future<Color?> _selectMode(ui.Image image, WidgetRef ref, [Size? size]) async {
@@ -224,6 +231,16 @@ class ColorPicker extends ConsumerWidget {
                     Offset(size.width ~/ 2 - 10, size.height ~/ 2 - 10),
                     Offset(size.width ~/ 2 + 10, size.height ~/ 2 + 10)
                 );
+        }
+    }
+
+    Future<void> _launchWikiURL(String? urlString) async {
+        if (urlString == null) {
+            return;
+        }
+        Uri url = Uri.parse(urlString);
+        if (!await launchUrl(url)) {
+            throw Exception('Could not launch $url');
         }
     }
 
@@ -250,50 +267,71 @@ class ColorPicker extends ConsumerWidget {
     
                                     return ColoredBox(
                                         color: pickedColor,
-                                        child: FittedBox(
-                                            fit: BoxFit.contain,
-                                            child: Padding(
-                                                padding: EdgeInsets.all(5.0),
-                                                child: Center(
-                                                    child: DefaultTextStyle(
-                                                        style: TextStyle(color: Colors.white),
-                                                        child: Column(
-                                                            children: [
-                                                                Row(
-                                                                    children: [
-                                                                        FutureBuilder(
-                                                                            future: _getColorName(pickedColor, ref.read(colorPickerProvider.notifier).state["colorSet"]),
-                                                                            builder: (context, colorName) {
-                                                                                return Text(
-                                                                                    colorName.data ?? "Loading...", 
-                                                                                    style: TextStyle(
-                                                                                        color: _findComplementaryColor(pickedColor), 
-                                                                                        fontSize: 15.0
-                                                                                    ),
-                                                                                );
-                                                                            },
-                                                                        ),
-                                                                        FloatingActionButton(
-                                                                            onPressed: () {
-                                                                                ref.read(colorPickerProvider.notifier).updateColorPickerSetting("pickerMode", ColorPickerMode.area);
-                                                                            },
-                                                                            child: Icon(Icons.visibility),
-                                                                        ),
-                                                                    ],
-                                                                ),
-                                                                Text(
-                                                                    _colorHexCode(pickedColor), 
-                                                                    style: TextStyle(
-                                                                        color: _findBWComplement(pickedColor), 
-                                                                        fontSize: 4.0,
+                                        child: Stack(
+                                            children: [
+                                                // Color selector text
+                                                SizedBox(
+                                                    width: size.width,
+                                                    height: boxHeight,
+                                                    child: FittedBox(
+                                                        fit: BoxFit.contain,
+                                                        child: Padding(
+                                                            padding: EdgeInsets.all(5.0),
+                                                            child: Center(
+                                                                child: DefaultTextStyle(
+                                                                    style: TextStyle(color: Colors.white),
+                                                                    child: Column(
+                                                                        children: [
+                                                                            FutureBuilder(
+                                                                                future: _getColorName(pickedColor, ref.read(colorPickerProvider.notifier).state["colorSet"]),
+                                                                                builder: (context, colorName) {
+                                                                                    return Text(
+                                                                                        colorName.data ?? "Loading...", 
+                                                                                        style: TextStyle(
+                                                                                            color: _findComplementaryColor(pickedColor), 
+                                                                                            fontSize: 15.0
+                                                                                        ),
+                                                                                    );
+                                                                                },
+                                                                            ),
+                                                                            Text(
+                                                                                _colorHexCode(pickedColor), 
+                                                                                style: TextStyle(
+                                                                                    color: _findBWComplement(pickedColor), 
+                                                                                    fontSize: 4.0,
+                                                                                ),
+                                                                            ),
+                                                                        ],
                                                                     ),
                                                                 ),
-                                                            ],
+                                                            ),
                                                         ),
                                                     ),
                                                 ),
-                                            ),
-                                        ),
+                                                // Buttons
+                                                Positioned(
+                                                    right: edgePadding,
+                                                    bottom: edgePadding,
+                                                    child: FloatingActionButton(
+                                                        onPressed: () {
+                                                            ref.read(colorPickerProvider.notifier).updateColorPickerSetting("pickerMode", ColorPickerMode.area);
+                                                        },
+                                                        child: Icon(Icons.visibility),
+                                                    ),
+                                                ),
+                                                Positioned(
+                                                    left: edgePadding,
+                                                    bottom: edgePadding,
+                                                    child: FloatingActionButton(
+                                                        onPressed: () async {
+                                                            final data = await _findClosestColorData(pickedColor, ref.read(colorPickerProvider.notifier).state["colorSet"]);
+                                                            _launchWikiURL(data["wiki_link"]);
+                                                        },
+                                                        child: Icon(Icons.visibility),
+                                                    ),
+                                                ),
+                                            ],
+                                        ), 
                                     );
                                 },
                             );
