@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_shaders/flutter_shaders.dart';
-import './saturation_widget.dart';
+import './blur_widget.dart';
 import '../shader_ui.dart';
 
 class ContrastWidget extends ConsumerWidget {
     ContrastWidget({super.key});
     
-    final SaturationWidget saturationWidget = SaturationWidget();
+    final BlurWidget blurWidget = BlurWidget();
 
     @override
     Widget build(BuildContext context, WidgetRef ref) {
@@ -27,7 +27,7 @@ class ContrastWidget extends ConsumerWidget {
                         ..setImageSampler(0, image);
                     canvas.drawRect(Offset.zero & size, Paint()..shader = shader);
                 },
-                child: saturationWidget,
+                child: blurWidget,
             ),
         );
     }

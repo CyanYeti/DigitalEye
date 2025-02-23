@@ -22,6 +22,7 @@ class ShaderState extends StateNotifier<Map<String, dynamic>> {
             'saturation/level': 1.0,
             'brightness/level': 1.0,
             'contrast/level': 1.0,
+            'blur/strength': 0.0,
         };
     }
 
@@ -280,6 +281,16 @@ class ShaderUI extends ConsumerWidget {
                                     ref.read(shaderProvider.notifier).updateShaderSetting('posterize/steps', steps);
                                 },
                                 controller: posterizeController,
+                            ),
+
+                            SizedBox(height: columnPadding),
+
+                            // Blur Slider
+                            FloatingButton(
+                                sliderStartPos: 0.0,
+                                onChanged: (val) {
+                                    ref.read(shaderProvider.notifier).updateShaderSetting('blur/strength', val);
+                                }
                             ),
 
                             
