@@ -244,6 +244,18 @@ class ColorPicker extends ConsumerWidget {
         }
     }
 
+    void _cycleMode(BuildContext context, WidgetRef ref) {
+        final ColorPickerMode previous = ref.read(colorPickerProvider.notifier).state["pickerMode"];
+
+        // Set new mode, refresh indicator
+        ref.read(colorPickerProvider.notifier).updateColorPickerSetting("pickerMode", _nextEnum(previous));
+    }
+
+    ColorPickerMode _nextEnum(ColorPickerMode current) {
+        final nextIndex = (current.index + 1) % ColorPickerMode.values.length;
+        return ColorPickerMode.values[nextIndex];
+    }
+
     @override
     Widget build(BuildContext context, WidgetRef ref) {
         final imageStream = ref.watch(screenImageProvider);
@@ -270,38 +282,43 @@ class ColorPicker extends ConsumerWidget {
                                         child: Stack(
                                             children: [
                                                 // Color selector text
-                                                SizedBox(
-                                                    width: size.width,
-                                                    height: boxHeight,
-                                                    child: FittedBox(
-                                                        fit: BoxFit.contain,
-                                                        child: Padding(
-                                                            padding: EdgeInsets.all(5.0),
-                                                            child: Center(
-                                                                child: DefaultTextStyle(
-                                                                    style: TextStyle(color: Colors.white),
-                                                                    child: Column(
-                                                                        children: [
-                                                                            FutureBuilder(
-                                                                                future: _getColorName(pickedColor, ref.read(colorPickerProvider.notifier).state["colorSet"]),
-                                                                                builder: (context, colorName) {
-                                                                                    return Text(
-                                                                                        colorName.data ?? "Loading...", 
+                                                Positioned.fill(
+                                                    child: Align(
+                                                        alignment: Alignment.center,
+                                                        child: SizedBox(
+                                                            width: size.width - (edgePadding * 2) - (50 * 2),
+                                                            height: boxHeight,
+                                                            child: FittedBox(
+                                                                fit: BoxFit.contain,
+                                                                child: Padding(
+                                                                    padding: EdgeInsets.all(5.0),
+                                                                    child: Center(
+                                                                        child: DefaultTextStyle(
+                                                                            style: TextStyle(color: Colors.white),
+                                                                            child: Column(
+                                                                                children: [
+                                                                                    FutureBuilder(
+                                                                                        future: _getColorName(pickedColor, ref.read(colorPickerProvider.notifier).state["colorSet"]),
+                                                                                        builder: (context, colorName) {
+                                                                                            return Text(
+                                                                                                colorName.data ?? "Loading...", 
+                                                                                                style: TextStyle(
+                                                                                                    color: _findComplementaryColor(pickedColor), 
+                                                                                                    fontSize: 15.0
+                                                                                                ),
+                                                                                            );
+                                                                                        },
+                                                                                    ),
+                                                                                    Text(
+                                                                                        _colorHexCode(pickedColor), 
                                                                                         style: TextStyle(
-                                                                                            color: _findComplementaryColor(pickedColor), 
-                                                                                            fontSize: 15.0
+                                                                                            color: _findBWComplement(pickedColor), 
+                                                                                            fontSize: 4.0,
                                                                                         ),
-                                                                                    );
-                                                                                },
+                                                                                    ),
+                                                                                ],
                                                                             ),
-                                                                            Text(
-                                                                                _colorHexCode(pickedColor), 
-                                                                                style: TextStyle(
-                                                                                    color: _findBWComplement(pickedColor), 
-                                                                                    fontSize: 4.0,
-                                                                                ),
-                                                                            ),
-                                                                        ],
+                                                                        ),
                                                                     ),
                                                                 ),
                                                             ),
@@ -314,7 +331,7 @@ class ColorPicker extends ConsumerWidget {
                                                     bottom: edgePadding,
                                                     child: FloatingActionButton(
                                                         onPressed: () {
-                                                            ref.read(colorPickerProvider.notifier).updateColorPickerSetting("pickerMode", ColorPickerMode.area);
+                                                            _cycleMode(context, ref);
                                                         },
                                                         child: Icon(Icons.auto_mode),
                                                     ),

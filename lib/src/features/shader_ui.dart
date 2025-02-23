@@ -8,6 +8,7 @@ import './ui/color_picker.dart';
 import './camera/camera_widget.dart';
 import './camera/screenshot_widget.dart';
 import './camera/camera_mode_widget.dart';
+import './ui/area_indicator_widget.dart';
 
 class ShaderState extends StateNotifier<Map<String, dynamic>> {
     ShaderState() : super({}) {
@@ -85,6 +86,9 @@ class ShaderUI extends ConsumerWidget {
     @override
     Widget build(BuildContext context, WidgetRef ref) {
         final shaderSettings = ref.watch(shaderProvider);
+        final colorPickerWatcher = ref.watch(colorPickerProvider);
+        final colorPickerMode = ref.read(colorPickerProvider.notifier).state["pickerMode"];
+        final Size indicatorSize = Size.square(20);
         final Size screenSize = MediaQuery.of(context).size;
 
         return Stack(
@@ -138,6 +142,23 @@ class ShaderUI extends ConsumerWidget {
                     right: 0,
                     left: 0,
                     child: ColorPicker(),
+                ),
+                Positioned.fill(
+                    child: Align(
+                        alignment: Alignment.center,
+                        child: Builder(
+                            builder: (context) {
+                                switch (colorPickerMode) {
+                                    case ColorPickerMode.simple:
+                                        return AreaIndicatorWidget.crosshair(size: indicatorSize);
+                                    case ColorPickerMode.area:
+                                        return AreaIndicatorWidget.rect(size: indicatorSize);
+                                    default:
+                                        return SizedBox();
+                                };
+                            },
+                        ),
+                    ),
                 ),
                 // Filter Slider UI
                 Positioned(

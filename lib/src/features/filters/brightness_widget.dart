@@ -8,9 +8,9 @@ import './contrast_widget.dart';
 import '../shader_ui.dart';
 
 class BrightnessWidget extends ConsumerWidget {
-    const BrightnessWidget({super.key});
+    BrightnessWidget({super.key});
     
-    final ContrastWidget contrastWidget = const ContrastWidget();
+    final ContrastWidget contrastWidget = ContrastWidget();
 
     @override
     Widget build(BuildContext context, WidgetRef ref) {

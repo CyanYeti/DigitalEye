@@ -38,7 +38,6 @@ class CameraModeWidget extends ConsumerWidget {
 
     @override
     Widget build(BuildContext context, WidgetRef ref) {
-        final cameraImage = ref.watch(cameraImageProvider);
         final globalKey = ref.read(imageModeGlobalKeyProvider);
         final imageMode = ref.watch(imageStreamerModeProvider);
 

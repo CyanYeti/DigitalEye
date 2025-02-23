@@ -8,9 +8,9 @@ import './saturation_widget.dart';
 import '../shader_ui.dart';
 
 class ContrastWidget extends ConsumerWidget {
-    const ContrastWidget({super.key});
+    ContrastWidget({super.key});
     
-    final SaturationWidget saturationWidget = const SaturationWidget();
+    final SaturationWidget saturationWidget = SaturationWidget();
 
     @override
     Widget build(BuildContext context, WidgetRef ref) {

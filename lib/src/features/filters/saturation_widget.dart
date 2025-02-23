@@ -6,14 +6,17 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_shaders/flutter_shaders.dart';
 import '../camera/camera_mode_widget.dart';
 import '../shader_ui.dart';
+import '../camera/camera_widget.dart';
 
 class SaturationWidget extends ConsumerWidget {
-    const SaturationWidget({super.key});
+    SaturationWidget({super.key});
 
 
     @override
     Widget build(BuildContext context, WidgetRef ref) {
         final shaderSettings = ref.watch(shaderProvider);
+        // The first shader needs to watch for updates
+        final cameraWatcher = ref.watch(cameraImageProvider);
 
         return Builder(
             builder: (context) {

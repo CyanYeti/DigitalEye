@@ -8,9 +8,9 @@ import './brightness_widget.dart';
 import '../shader_ui.dart';
 
 class PosterizeWidget extends ConsumerWidget {
-    const PosterizeWidget({super.key});
+    PosterizeWidget({super.key});
     
-    final BrightnessWidget brightnessWidget = const BrightnessWidget();
+    final BrightnessWidget brightnessWidget = BrightnessWidget();
 
     @override
     Widget build(BuildContext context, WidgetRef ref) {

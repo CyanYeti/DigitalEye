@@ -47,7 +47,6 @@ class _CameraWidgetState extends ConsumerState<CameraWidget> with WidgetsBinding
         if (!mounted) {
           return;
         }
-        setState(() {});
         controller?.startImageStream((image) => setState(() {
           ref.read(cameraImageProvider.notifier).setCameraImage(image);
         }));
@@ -59,6 +58,7 @@ class _CameraWidgetState extends ConsumerState<CameraWidget> with WidgetsBinding
   void dispose() {
     controller?.stopImageStream();
     controller?.dispose();
+    controller = null;
     WidgetsBinding.instance!.removeObserver(this);
     super.dispose();
   }
@@ -66,15 +66,9 @@ class _CameraWidgetState extends ConsumerState<CameraWidget> with WidgetsBinding
   // From camera doc to dispose camera on inactive app
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final CameraController? cameraController = controller;
-  
-    // App state changed before we got the chance to initialize.
-    if (cameraController == null || !cameraController.value.isInitialized) {
-      return;
-    }
-  
     if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
-      cameraController.dispose();
+      controller?.dispose();
+      controller = null;
     } else if (state == AppLifecycleState.resumed) {
       _initializeCameraController();
     }
