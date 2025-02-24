@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 //import 'package:flutter/widgets.dart';
 
 class CameraImageState extends StateNotifier<Map<String, CameraImage>> {
-  CameraImageState() : super({}) {}
+  CameraImageState() : super({});
 
   void setCameraImage(CameraImage image) {
     state = {"image": image};
@@ -33,7 +33,7 @@ class _CameraWidgetState extends ConsumerState<CameraWidget>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance!.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
     _initializeCameraController();
   }
 
@@ -60,7 +60,7 @@ class _CameraWidgetState extends ConsumerState<CameraWidget>
               }),
             );
           })
-          .catchError((Object e) => print(e));
+          .catchError((e) => debugPrint('Error initializing camera $e'));
     });
   }
 
@@ -69,7 +69,7 @@ class _CameraWidgetState extends ConsumerState<CameraWidget>
     controller?.stopImageStream();
     controller?.dispose();
     controller = null;
-    WidgetsBinding.instance!.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -99,7 +99,7 @@ class _CameraWidgetState extends ConsumerState<CameraWidget>
     // this is actually size.aspectRatio / (1 / camera.aspectRatio)
     // because camera preview size is received as landscape
     // but we're calculating for portrait orientation
-    var scale = size.aspectRatio * camera!.aspectRatio;
+    var scale = size.aspectRatio * camera.aspectRatio;
 
     // to prevent scaling down, invert the value
     if (scale < 1) scale = 1 / scale;
@@ -119,6 +119,7 @@ class _CameraWidgetState extends ConsumerState<CameraWidget>
           if (controller != null &&
               snapshot.connectionState == ConnectionState.done) {
             return Center(child: scaledCameraWidget(context));
+            //return Center(child: CameraPreview(controller!));
           } else {
             return const Center(child: CircularProgressIndicator());
           }

@@ -1,6 +1,4 @@
-import "dart:ui";
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 enum IndicatorShape { crosshair, rectangle, circle, multipoint }
 
@@ -41,7 +39,7 @@ class AreaIndicatorWidget extends StatelessWidget {
 
   Widget _drawRect(BuildContext context) {
     return RepaintBoundary(
-      child: Container(
+      child: SizedBox(
         width: size.width,
         height: size.height,
         child: CustomPaint(painter: RectanglePainter(brush: linePainter)),
@@ -51,7 +49,7 @@ class AreaIndicatorWidget extends StatelessWidget {
 
   Widget _drawCrosshair(BuildContext context) {
     return RepaintBoundary(
-      child: Container(
+      child: SizedBox(
         width: size.width,
         height: size.height,
         child: CustomPaint(
@@ -63,7 +61,7 @@ class AreaIndicatorWidget extends StatelessWidget {
 
   Widget _drawCircle(BuildContext context) {
     return RepaintBoundary(
-      child: Container(
+      child: SizedBox(
         width: size.width,
         height: size.height,
         child: CustomPaint(painter: CirclePainter(brush: linePainter)),
@@ -74,7 +72,7 @@ class AreaIndicatorWidget extends StatelessWidget {
   // Draws points represented as x,y points in a closed path. Origin is centered
   Widget _drawMultipoint(BuildContext context) {
     return RepaintBoundary(
-      child: Container(
+      child: SizedBox(
         width: size.width,
         height: size.height,
         child: Center(
@@ -97,8 +95,6 @@ class AreaIndicatorWidget extends StatelessWidget {
         return _drawCircle(context);
       case IndicatorShape.multipoint:
         return _drawMultipoint(context);
-      default:
-        return Icon(Icons.error);
     }
   }
 }
