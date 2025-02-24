@@ -1,10 +1,7 @@
-import 'dart:ui' as ui;
-
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:flutter/widgets.dart';
+//import 'package:flutter/widgets.dart';
 
 class CameraImageState extends StateNotifier<Map<String, CameraImage>> {
   CameraImageState() : super({}) {}
@@ -14,7 +11,10 @@ class CameraImageState extends StateNotifier<Map<String, CameraImage>> {
   }
 }
 
-final cameraImageProvider = StateNotifierProvider<CameraImageState, Map<String, CameraImage>>((ref) => CameraImageState());
+final cameraImageProvider =
+    StateNotifierProvider<CameraImageState, Map<String, CameraImage>>(
+      (ref) => CameraImageState(),
+    );
 
 class CameraWidget extends ConsumerStatefulWidget {
   const CameraWidget({super.key});
@@ -24,7 +24,8 @@ class CameraWidget extends ConsumerStatefulWidget {
   ConsumerState<CameraWidget> createState() => _CameraWidgetState();
 }
 
-class _CameraWidgetState extends ConsumerState<CameraWidget> with WidgetsBindingObserver {
+class _CameraWidgetState extends ConsumerState<CameraWidget>
+    with WidgetsBindingObserver {
   // get list of cameras async
   final Future<List<CameraDescription>> _camerasFuture = availableCameras();
   CameraController? controller;
@@ -42,15 +43,24 @@ class _CameraWidgetState extends ConsumerState<CameraWidget> with WidgetsBinding
     }
     //start pulling camera data on init
     _camerasFuture.then((cameras) {
-      controller = CameraController(cameras[0], ResolutionPreset.max);
-      controller!.initialize().then((_) async {
-        if (!mounted) {
-          return;
-        }
-        controller?.startImageStream((image) => setState(() {
-          ref.read(cameraImageProvider.notifier).setCameraImage(image);
-        }));
-      }).catchError((Object e) => print(e));
+      controller = CameraController(
+        cameras[0],
+        ResolutionPreset.max,
+        enableAudio: false,
+      );
+      controller!
+          .initialize()
+          .then((_) async {
+            if (!mounted) {
+              return;
+            }
+            controller?.startImageStream(
+              (image) => setState(() {
+                ref.read(cameraImageProvider.notifier).setCameraImage(image);
+              }),
+            );
+          })
+          .catchError((Object e) => print(e));
     });
   }
 
@@ -66,7 +76,8 @@ class _CameraWidgetState extends ConsumerState<CameraWidget> with WidgetsBinding
   // From camera doc to dispose camera on inactive app
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused) {
       controller?.dispose();
       controller = null;
     } else if (state == AppLifecycleState.resumed) {
@@ -81,7 +92,6 @@ class _CameraWidgetState extends ConsumerState<CameraWidget> with WidgetsBinding
     var camera = controller!.value;
     // fetch screen size
     final size = MediaQuery.of(context).size;
-        
 
     //double aspectRatio = camera.previewSize!.height / camera.previewSize!.width;
     //double scale = size.height / (size.width * aspectRatio);
@@ -96,9 +106,7 @@ class _CameraWidgetState extends ConsumerState<CameraWidget> with WidgetsBinding
 
     return Transform.scale(
       scale: scale,
-      child: Center(
-        child: CameraPreview(controller!),
-      ),
+      child: Center(child: CameraPreview(controller!)),
     );
   }
 
@@ -108,14 +116,13 @@ class _CameraWidgetState extends ConsumerState<CameraWidget> with WidgetsBinding
       body: FutureBuilder(
         future: _camerasFuture,
         builder: (context, snapshot) {
-          if (controller != null && snapshot.connectionState == ConnectionState.done) {
-            return Center(
-              child: scaledCameraWidget(context),
-            );
+          if (controller != null &&
+              snapshot.connectionState == ConnectionState.done) {
+            return Center(child: scaledCameraWidget(context));
           } else {
             return const Center(child: CircularProgressIndicator());
           }
-        }
+        },
       ),
     );
   }
