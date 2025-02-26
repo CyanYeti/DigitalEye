@@ -1,9 +1,11 @@
+import 'package:digitaleye/src/features/ui/base_button_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:math';
 import 'dart:convert';
 import 'dart:ui' as ui;
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:hugeicons/hugeicons.dart';
 import '../camera/image_streamer_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -369,28 +371,36 @@ class ColorPicker extends ConsumerWidget {
                           ),
                         ),
                         // Buttons
-                        Positioned(
-                          right: edgePadding,
-                          top: edgePadding,
-                          child: FloatingActionButton(
-                            onPressed: () {
-                              _cycleMode(context, ref);
-                            },
-                            child: Icon(Icons.auto_mode),
+                        Positioned.fill(
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: Padding(
+                              padding: EdgeInsets.all(edgePadding),
+                              child: BaseButtonWidget(
+                                onTap: () {
+                                  _cycleMode(context, ref);
+                                },
+                                icon: HugeIcons.strokeRoundedBlend,
+                              ),
+                            ),
                           ),
                         ),
-                        Positioned(
-                          left: edgePadding,
-                          top: edgePadding,
-                          child: FloatingActionButton(
-                            onPressed: () async {
-                              final data = await _findClosestColorData(
-                                pickedColor,
-                                colorPickerSetting["colorSet"],
-                              );
-                              _launchWikiURL(data["wiki_link"]);
-                            },
-                            child: Icon(Icons.web),
+                        Positioned.fill(
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Padding(
+                              padding: EdgeInsets.all(edgePadding),
+                              child: BaseButtonWidget(
+                                onTap: () async {
+                                  final data = await _findClosestColorData(
+                                    pickedColor,
+                                    colorPickerSetting["colorSet"],
+                                  );
+                                  _launchWikiURL(data["wiki_link"]);
+                                },
+                                icon: HugeIcons.strokeRoundedWikipedia,
+                              ),
+                            ),
                           ),
                         ),
                       ],

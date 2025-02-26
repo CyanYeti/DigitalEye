@@ -1,10 +1,11 @@
+import 'package:digitaleye/src/features/ui/capture_button_widget.dart';
 import 'package:digitaleye/src/features/ui/image_viewer_widget.dart';
+import 'package:digitaleye/src/features/ui/mode_controls_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import './ui/floating_button.dart';
 import './ui/color_picker.dart';
-import './camera/screenshot_widget.dart';
 import './camera/camera_mode_widget.dart';
 import './ui/area_indicator_widget.dart';
 import './camera/image_streamer_widget.dart';
@@ -83,47 +84,6 @@ class ShaderUI extends ConsumerWidget {
     ref.read(movablePositionStateProvider.notifier).resetPosition();
   }
 
-  void _toggleCameraFeed(WidgetRef ref) {
-    final ImageMode imageMode = ref.read(imageStreamerModeProvider);
-    if (imageMode == ImageMode.freezed || imageMode == ImageMode.selection) {
-      _startCameraFeed(ref);
-    } else {
-      _pauseCameraFeed(ref);
-    }
-  }
-
-  void _pauseCameraFeed(WidgetRef ref) {
-    ref.read(movablePositionStateProvider.notifier).setUnlocked();
-    ref.read(imageStreamerModeProvider.notifier).state = ImageMode.freezed;
-  }
-
-  void _startCameraFeed(WidgetRef ref) {
-    ref.read(movablePositionStateProvider.notifier).resetPosition();
-    ref.read(movablePositionStateProvider.notifier).setLocked();
-    ref.read(imageStreamerModeProvider.notifier).state = ImageMode.camera;
-  }
-
-  void _startImageSelect(WidgetRef ref) {
-    ref.read(movablePositionStateProvider.notifier).setUnlocked();
-    ref.read(imageStreamerModeProvider.notifier).state = ImageMode.camera;
-    ref.read(imageStreamerModeProvider.notifier).state = ImageMode.selection;
-  }
-
-  void saveImage(Uint8List? imageFile) async {
-    if (imageFile == null) {
-      return;
-    }
-    final hasAccess = await Gal.hasAccess(toAlbum: true);
-
-    if (!hasAccess) {
-      await Gal.requestAccess(toAlbum: true);
-    }
-
-    await Gal.putImageBytes(imageFile);
-
-    Gal.open();
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // ignore: unused_local_variable
@@ -138,21 +98,12 @@ class ShaderUI extends ConsumerWidget {
         const ImageStreamer(),
         // Screenshot button
         Positioned(
-          bottom: 10,
-          left: screenSize.width / 2 - 25,
-          child: FloatingActionButton(
-            onPressed: () {
-              ref
-                  .read(screenshotControllerProvider)
-                  .capture()
-                  .then((Uint8List? image) {
-                    saveImage(image);
-                  })
-                  .catchError((onError) {
-                    debugPrint(onError);
-                  });
-            },
-            child: Icon(Icons.camera),
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: EdgeInsets.only(bottom: edgePadding),
+              child: CaptureButtonWidget(),
+            ),
           ),
         ),
         // flip and reset controls
@@ -161,31 +112,31 @@ class ShaderUI extends ConsumerWidget {
           right: edgePadding,
           child: Column(
             children: [
-              FloatingActionButton(
-                onPressed:
+              BaseButtonWidget(
+                onTap:
                     () => ref
                         .read(shaderProvider.notifier)
                         .updateShaderSetting(
                           'flip/horizontal',
                           1.0 - ref.read(shaderProvider)['flip/horizontal'],
                         ),
-                child: Icon(Icons.swap_horiz),
+                icon: HugeIcons.strokeRoundedFlipHorizontal,
               ),
               SizedBox(height: columnPadding),
-              FloatingActionButton(
-                onPressed:
+              BaseButtonWidget(
+                onTap:
                     () => ref
                         .read(shaderProvider.notifier)
                         .updateShaderSetting(
                           'flip/vertical',
                           1.0 - ref.read(shaderProvider)['flip/vertical'],
                         ),
-                child: Icon(Icons.swap_vert),
+                icon: HugeIcons.strokeRoundedFlipVertical,
               ),
               SizedBox(height: columnPadding),
-              FloatingActionButton(
-                onPressed: () => resetAll(ref),
-                child: Icon(Icons.restart_alt),
+              BaseButtonWidget(
+                onTap: () => resetAll(ref),
+                icon: HugeIcons.strokeRoundedReload,
               ),
             ],
           ),
@@ -194,23 +145,7 @@ class ShaderUI extends ConsumerWidget {
         Positioned(
           bottom: edgePadding,
           left: edgePadding,
-          child: Column(
-            children: [
-              FloatingActionButton(
-                onPressed: () {
-                  _toggleCameraFeed(ref);
-                },
-                child: Icon(Icons.pause_circle),
-              ),
-              SizedBox(height: columnPadding),
-              FloatingActionButton(
-                onPressed: () {
-                  _startImageSelect(ref);
-                },
-                child: Icon(Icons.file_open),
-              ),
-            ],
-          ),
+          child: ModeControlsWidget(columnPadding: columnPadding),
         ),
         // Color picker
         Positioned(top: 0, right: 0, left: 0, child: const ColorPicker()),
@@ -219,6 +154,7 @@ class ShaderUI extends ConsumerWidget {
             alignment: Alignment.center,
             child: Builder(
               builder: (context) {
+                // TODO: Make this actually link to the true area
                 switch (colorPickerMode) {
                   case ColorPickerMode.simple:
                     return AreaIndicatorWidget.crosshair(size: indicatorSize);
@@ -405,16 +341,6 @@ class ShaderUI extends ConsumerWidget {
                 },
               ),
             ],
-          ),
-        ),
-        // TODO: REMOVE THIS IS IT TEMP
-        Positioned(
-          child: Align(
-            alignment: Alignment.center,
-            child: BaseButtonWidget(
-              icon: HugeIcons.strokeRoundedPlayCircle,
-              mini: false,
-            ),
           ),
         ),
       ],
