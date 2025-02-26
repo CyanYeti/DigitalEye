@@ -1,3 +1,4 @@
+import 'package:digitaleye/src/features/ui/image_viewer_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import './ui/floating_button.dart';
@@ -5,6 +6,9 @@ import './ui/color_picker.dart';
 import './camera/screenshot_widget.dart';
 import './camera/camera_mode_widget.dart';
 import './ui/area_indicator_widget.dart';
+import './camera/image_streamer_widget.dart';
+import 'dart:typed_data';
+import 'package:gal/gal.dart';
 
 class ShaderState extends StateNotifier<Map<String, dynamic>> {
   ShaderState() : super({}) {
@@ -84,16 +88,35 @@ class ShaderUI extends ConsumerWidget {
   }
 
   void _pauseCameraFeed(WidgetRef ref) {
+    ref.read(movablePositionStateProvider.notifier).setUnlocked();
     ref.read(imageStreamerModeProvider.notifier).state = ImageMode.freezed;
   }
 
   void _startCameraFeed(WidgetRef ref) {
+    ref.read(movablePositionStateProvider.notifier).resetPosition();
+    ref.read(movablePositionStateProvider.notifier).setLocked();
     ref.read(imageStreamerModeProvider.notifier).state = ImageMode.camera;
   }
 
   void _startImageSelect(WidgetRef ref) {
+    ref.read(movablePositionStateProvider.notifier).setUnlocked();
     ref.read(imageStreamerModeProvider.notifier).state = ImageMode.camera;
     ref.read(imageStreamerModeProvider.notifier).state = ImageMode.selection;
+  }
+
+  void saveImage(Uint8List? imageFile) async {
+    if (imageFile == null) {
+      return;
+    }
+    final hasAccess = await Gal.hasAccess(toAlbum: true);
+
+    if (!hasAccess) {
+      await Gal.requestAccess(toAlbum: true);
+    }
+
+    await Gal.putImageBytes(imageFile);
+
+    Gal.open();
   }
 
   @override
@@ -107,7 +130,26 @@ class ShaderUI extends ConsumerWidget {
     return Stack(
       children: [
         // Camera and filter stack
-        const ScreenshotWidget(),
+        const ImageStreamer(),
+        // Screenshot button
+        Positioned(
+          bottom: 10,
+          left: screenSize.width / 2 - 25,
+          child: FloatingActionButton(
+            onPressed: () {
+              ref
+                  .read(screenshotControllerProvider)
+                  .capture()
+                  .then((Uint8List? image) {
+                    saveImage(image);
+                  })
+                  .catchError((onError) {
+                    debugPrint(onError);
+                  });
+            },
+            child: Icon(Icons.camera),
+          ),
+        ),
         // flip and reset controls
         Positioned(
           bottom: edgePadding,

@@ -1,25 +1,57 @@
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ImageViewerWidget extends ConsumerStatefulWidget {
-  final ui.Image image;
-  const ImageViewerWidget({super.key, required this.image});
+class MovablePositionState extends StateNotifier<Map<String, dynamic>> {
+  MovablePositionState() : super({}) {
+    _initDefault();
+  }
 
-  @override
-  _ImageViewerWidgetState createState() => _ImageViewerWidgetState();
+  void _initDefault() {
+    state = {'position': Offset.zero, 'zoom': 1.0, 'isLocked': true};
+  }
+
+  void setLocked() {
+    state = {...state, 'isLocked': true};
+  }
+
+  void resetPosition() {
+    _initDefault();
+  }
+
+  void setUnlocked() {
+    state = {...state, 'isLocked': false};
+  }
+
+  bool _isLocked() {
+    return state["isLocked"];
+  }
+
+  void _updateSetting(String key, dynamic value) {
+    state = {...state, key: value};
+  }
 }
 
-class _ImageViewerWidgetState extends ConsumerState<ImageViewerWidget> {
-  Offset position = Offset.zero;
-  double zoom = 1.0;
+final movablePositionStateProvider =
+    StateNotifierProvider<MovablePositionState, Map<String, dynamic>>((ref) {
+      return MovablePositionState();
+    });
+
+class MovableViewerWidget extends ConsumerStatefulWidget {
+  final Widget child;
+  const MovableViewerWidget({super.key, required this.child});
+
+  @override
+  _MovableViewerWidgetState createState() => _MovableViewerWidgetState();
+}
+
+class _MovableViewerWidgetState extends ConsumerState<MovableViewerWidget> {
   double previousZoom = 1.0;
-  late ui.Image image;
+  late final Widget child;
 
   @override
   void initState() {
     super.initState();
-    image = widget.image;
+    child = widget.child;
   }
 
   @override
@@ -28,35 +60,48 @@ class _ImageViewerWidgetState extends ConsumerState<ImageViewerWidget> {
   }
 
   void _handleScaleStart(ScaleStartDetails details) {
+    if (ref.read(movablePositionStateProvider.notifier)._isLocked()) {
+      return;
+    }
+
     // if one finder pan
     if (details.pointerCount == 2) {
-      previousZoom = zoom;
+      previousZoom = ref.read(movablePositionStateProvider)['zoom'];
     }
   }
 
   void _handleScaleUpdate(ScaleUpdateDetails details) {
+    if (ref.read(movablePositionStateProvider.notifier)._isLocked()) {
+      return;
+    }
+    Offset position = ref.read(movablePositionStateProvider)["position"];
+    double zoom = ref.read(movablePositionStateProvider)["zoom"];
+
     if (details.pointerCount == 1) {
       Offset delta = details.focalPointDelta;
       position = Offset(position.dx + delta.dx, position.dy + delta.dy);
+      ref
+          .read(movablePositionStateProvider.notifier)
+          ._updateSetting('position', position);
     } else if (details.pointerCount == 2) {
       zoom = previousZoom * details.scale;
       zoom = zoom.clamp(.5, 10);
+      ref
+          .read(movablePositionStateProvider.notifier)
+          ._updateSetting('zoom', zoom);
     }
     setState(() {});
   }
 
   void _handleDoubleTap() {
-    _resetTransform();
+    ref.read(movablePositionStateProvider.notifier).resetPosition();
     setState(() {});
-  }
-
-  void _resetTransform() {
-    zoom = 1.0;
-    position = Offset.zero;
   }
 
   @override
   Widget build(BuildContext context) {
+    Offset position = ref.watch(movablePositionStateProvider)['position'];
+    double zoom = ref.watch(movablePositionStateProvider)['zoom'];
     // Gesture detect drags
     // move image around
     // zoom in and out
@@ -86,7 +131,8 @@ class _ImageViewerWidgetState extends ConsumerState<ImageViewerWidget> {
                   offset: position,
                   child: Transform.scale(
                     scale: zoom,
-                    child: RawImage(image: image),
+                    //child: RawImage(image: image),
+                    child: child,
                   ),
                 ),
               ),

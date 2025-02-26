@@ -102,7 +102,7 @@ class _CameraModeWidgetState extends ConsumerState<CameraModeWidget> {
                 if (snapshot.data == null) {
                   return CircularProgressIndicator();
                 }
-                return ImageViewerWidget(image: snapshot.data!);
+                return RawImage(image: snapshot.data!);
               },
             );
           case ImageMode.selection:
@@ -113,7 +113,7 @@ class _CameraModeWidgetState extends ConsumerState<CameraModeWidget> {
                     snapshot.connectionState != ConnectionState.done) {
                   return CircularProgressIndicator();
                 }
-                return ImageViewerWidget(image: snapshot.data!);
+                return RawImage(image: snapshot.data!);
               },
             );
           default:

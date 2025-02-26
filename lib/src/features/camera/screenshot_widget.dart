@@ -1,24 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:gal/gal.dart';
 import '../filters/posterize_widget.dart';
 import './image_streamer_widget.dart';
 import 'dart:typed_data';
 
-class ScreenshotWidget extends StatefulWidget {
-  const ScreenshotWidget({super.key});
+final screenshotControllerProvider = Provider<ScreenshotController>((ref) {
+  return ScreenshotController();
+});
+
+class ScreenshotWidget extends ConsumerStatefulWidget {
+  final Widget child;
+  const ScreenshotWidget({super.key, required this.child});
 
   @override
   _ScreenshotWidgetState createState() => _ScreenshotWidgetState();
 }
 
-class _ScreenshotWidgetState extends State<ScreenshotWidget> {
+class _ScreenshotWidgetState extends ConsumerState<ScreenshotWidget> {
   Uint8List? _imageFile;
-  ScreenshotController ssController = ScreenshotController();
+  late final ScreenshotController ssController;
+  late final Widget child;
 
   @override
   void initState() {
     super.initState();
+    child = widget.child;
+    ssController = ref.read(screenshotControllerProvider);
   }
 
   @override
@@ -57,17 +67,7 @@ class _ScreenshotWidgetState extends State<ScreenshotWidget> {
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
     return Stack(
-      children: [
-        Screenshot(controller: ssController, child: ImageStreamer()),
-        Positioned(
-          bottom: 10,
-          left: screenSize.width / 2 - 25,
-          child: FloatingActionButton(
-            onPressed: () => captureScreenshot(),
-            child: Icon(Icons.camera),
-          ),
-        ),
-      ],
+      children: [Screenshot(controller: ssController, child: child)],
     );
   }
 }
