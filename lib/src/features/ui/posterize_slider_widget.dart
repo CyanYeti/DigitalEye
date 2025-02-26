@@ -18,11 +18,11 @@ class PosterizeSliderWidget extends ConsumerWidget {
       sliderStartPos: 0.0,
       steps: posterizeSteps,
       toggleIcons: [
-        Icon(Icons.expand_sharp),
-        Icon(Icons.looks_two_rounded),
-        Icon(Icons.looks_3_rounded),
-        Icon(Icons.looks_5_rounded),
-        Icon(Icons.nine_k),
+        Icons.expand_sharp,
+        Icons.looks_two_rounded,
+        Icons.looks_3_rounded,
+        Icons.looks_5_rounded,
+        Icons.nine_k,
       ],
       onTap: (option) {
         double steps = 0.0;

@@ -12,9 +12,9 @@ class SaturationSliderWidget extends ConsumerWidget {
     return AdvancedSliderWidget(
       sliderStartPos: 0.5,
       toggleIcons: [
-        Icon(Icons.color_lens),
-        Icon(Icons.color_lens_outlined),
-        Icon(Icons.color_lens, color: Colors.yellowAccent),
+        Icons.color_lens,
+        Icons.color_lens_outlined,
+        Icons.color_lens,
       ],
       onTap: (option) {
         double newSettingPercent = 1.0;

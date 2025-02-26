@@ -69,7 +69,6 @@ class ShaderUI extends ConsumerWidget {
   final double posterizeSteps = 10.0;
 
   // TODO: These should be a static const somewhere to sync across app
-  final double leftPaddingSliders = 15;
   final double edgePadding = 15;
   final double columnPadding = 10;
 
@@ -191,50 +190,55 @@ class ShaderUI extends ConsumerWidget {
         ),
         // Filter Slider UI
         Positioned(
-          top: screenSize.height / 2,
-          left: leftPaddingSliders,
-          child: Column(
-            children: [
-              // Contrast Slider
-              ContrastSliderWidget(controller: contrastController),
-              SizedBox(height: columnPadding),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Padding(
+              padding: EdgeInsets.all(edgePadding),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Contrast Slider
+                  ContrastSliderWidget(controller: contrastController),
+                  SizedBox(height: columnPadding),
 
-              // Saturation Slider
-              SaturationSliderWidget(controller: saturationController),
-              SizedBox(height: columnPadding),
+                  // Saturation Slider
+                  SaturationSliderWidget(controller: saturationController),
+                  SizedBox(height: columnPadding),
 
-              // WARN: If these get to big break them into other files
-              // Brightness Slider
-              AdvancedSliderWidget(
-                sliderStartPos: 0.5,
-                onChanged: (val) {
-                  ref
-                      .read(shaderProvider.notifier)
-                      .updateShaderSetting('brightness/level', 2 * val);
-                },
-                controller: brightnessController,
+                  // WARN: If these get to big break them into other files
+                  // Brightness Slider
+                  AdvancedSliderWidget(
+                    sliderStartPos: 0.5,
+                    onChanged: (val) {
+                      ref
+                          .read(shaderProvider.notifier)
+                          .updateShaderSetting('brightness/level', 2 * val);
+                    },
+                    controller: brightnessController,
+                  ),
+
+                  SizedBox(height: columnPadding),
+
+                  // Posterize slider
+                  PosterizeSliderWidget(
+                    controller: posterizeController,
+                    posterizeSteps: posterizeSteps,
+                  ),
+                  SizedBox(height: columnPadding),
+
+                  // Blur Slider
+                  AdvancedSliderWidget(
+                    sliderStartPos: 0.0,
+                    onChanged: (val) {
+                      ref
+                          .read(shaderProvider.notifier)
+                          .updateShaderSetting('blur/strength', val);
+                    },
+                    controller: blurController,
+                  ),
+                ],
               ),
-
-              SizedBox(height: columnPadding),
-
-              // Posterize slider
-              PosterizeSliderWidget(
-                controller: posterizeController,
-                posterizeSteps: posterizeSteps,
-              ),
-              SizedBox(height: columnPadding),
-
-              // Blur Slider
-              AdvancedSliderWidget(
-                sliderStartPos: 0.0,
-                onChanged: (val) {
-                  ref
-                      .read(shaderProvider.notifier)
-                      .updateShaderSetting('blur/strength', val);
-                },
-                controller: blurController,
-              ),
-            ],
+            ),
           ),
         ),
       ],

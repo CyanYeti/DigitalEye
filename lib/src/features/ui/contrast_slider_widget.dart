@@ -12,10 +12,10 @@ class ContrastSliderWidget extends ConsumerWidget {
     return AdvancedSliderWidget(
       sliderStartPos: 0.5,
       toggleIcons: [
-        Icon(Icons.ac_unit),
-        Icon(Icons.add),
-        Icon(Icons.adjust),
-        Icon(Icons.airline_stops),
+        Icons.ac_unit,
+        Icons.add,
+        Icons.adjust,
+        Icons.airline_stops,
       ],
       onTap: (option) {
         double newSettingPercent = 1.0;

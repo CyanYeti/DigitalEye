@@ -43,10 +43,6 @@ class _BaseButtonWidgetState extends State<BaseButtonWidget> {
   Color buttonColorDark = ColorPalette.dark1;
   Color buttonColorLight = ColorPalette.dark2;
 
-  void _handleOnTap() {
-    widget.onTap?.call();
-  }
-
   void _handleOnTapDown() {
     iconColor = ColorPalette.bright3;
     buttonColorDark = ColorPalette.dark2;
@@ -55,6 +51,7 @@ class _BaseButtonWidgetState extends State<BaseButtonWidget> {
   }
 
   void _handleOnTapUp() {
+    widget.onTap?.call();
     iconColor = ColorPalette.bright1;
     buttonColorDark = ColorPalette.dark1;
     buttonColorLight = ColorPalette.dark2;
@@ -62,7 +59,11 @@ class _BaseButtonWidgetState extends State<BaseButtonWidget> {
   }
 
   void _handleOnTapCancel() {
-    _handleOnTapUp();
+    print("canceled");
+    iconColor = ColorPalette.bright1;
+    buttonColorDark = ColorPalette.dark1;
+    buttonColorLight = ColorPalette.dark2;
+    setState(() {});
   }
 
   @override
@@ -79,11 +80,10 @@ class _BaseButtonWidgetState extends State<BaseButtonWidget> {
           Positioned.fill(
             child: Align(
               alignment: Alignment.center,
-              child: GestureDetector(
-                onTapDown: (details) => _handleOnTapDown(),
-                onTapUp: (details) => _handleOnTapUp(),
-                onTapCancel: () => _handleOnTapCancel(),
-                onTap: _handleOnTap,
+              child: Listener(
+                onPointerDown: (details) => _handleOnTapDown(),
+                onPointerUp: (details) => _handleOnTapUp(),
+                onPointerCancel: (details) => _handleOnTapCancel(),
                 child: CustomPaint(
                   painter: ButtonPainter(
                     darkColor: buttonColorDark,

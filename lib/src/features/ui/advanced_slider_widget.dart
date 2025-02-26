@@ -1,3 +1,6 @@
+import 'dart:ui';
+
+import 'package:digitaleye/src/features/ui/base_button_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -22,7 +25,7 @@ class AdvancedSliderWidget extends StatefulWidget {
   final AdvancedSliderController? controller;
 
   AdvancedSliderWidget({
-    this.sliderWidth = 50,
+    this.sliderWidth = 30,
     this.sliderHeight = 300,
     this.sliderStartPos = 1.0,
     this.sliderColor = Colors.orange,
@@ -47,7 +50,7 @@ class _AdvancedSliderWidgetState extends State<AdvancedSliderWidget> {
   double _dragPercentage = 0.0;
   bool _isDragging = false; //Prevent closing if starting button signals closing
   Offset _dragDiff = Offset.zero;
-  ChangeNotifier _repaint = ChangeNotifier();
+  final ChangeNotifier _repaint = ChangeNotifier();
 
   // Cycle button
   int currentOption = 0;
@@ -96,7 +99,6 @@ class _AdvancedSliderWidgetState extends State<AdvancedSliderWidget> {
     setState(() {
       _dragPosition = widget.sliderHeight * percent;
       _dragPercentage = percent;
-      _repaint.notifyListeners();
     });
 
     entry?.markNeedsBuild();
@@ -132,13 +134,14 @@ class _AdvancedSliderWidgetState extends State<AdvancedSliderWidget> {
 
   void showOverlay(BuildContext context) {
     RenderBox box = baseKey.currentContext?.findRenderObject() as RenderBox;
+    Size buttonSize = box.size;
     Offset position = box.localToGlobal(Offset.zero);
 
     entry = OverlayEntry(
       builder: (context) {
         return Positioned(
-          top: position.dy - widget.sliderHeight / 2.0,
-          left: position.dx - widget.sliderWidth / 2.0,
+          top: position.dy - widget.sliderHeight / 2 + buttonSize.height / 2,
+          left: position.dx + buttonSize.width + 10,
           child: TapRegion(
             onTapOutside: (details) => _onDragEnd(context),
             child: Container(
@@ -184,11 +187,12 @@ class _AdvancedSliderWidgetState extends State<AdvancedSliderWidget> {
         );
       },
     );
-    final overlay = Overlay.of(context)!;
+    final overlay = Overlay.of(context);
     overlay.insert(entry!);
   }
 
   void _handleOnTap() {
+    print("Saw Tap");
     _updateOption(currentOption + 1);
 
     widget.onTap?.call(currentOption);
@@ -219,16 +223,18 @@ class _AdvancedSliderWidgetState extends State<AdvancedSliderWidget> {
   Widget build(BuildContext context) {
     return GestureDetector(
       key: baseKey,
-      //onTapDown: (details) => {showOverlay(context)},
-      //onTapUp: (details) => {hideOverlay(context)},
-      //onTapCancel: () => {hideOverlay(context)},
       onTap: () => {_handleOnTap()},
       onLongPress: () => {showOverlay(context)},
       onLongPressCancel: () => {hideOverlay(context)},
-      child:
-          widget.toggleIcons.isEmpty
-              ? Icon(Icons.visibility)
-              : widget.toggleIcons[currentOption],
+      behavior: HitTestBehavior.translucent,
+      child: BaseButtonWidget(
+        mini: true,
+        onTap: () {},
+        icon:
+            widget.toggleIcons.isEmpty
+                ? Icons.visibility
+                : widget.toggleIcons[currentOption],
+      ),
     );
   }
 }
@@ -299,10 +305,18 @@ class SliderPainter extends CustomPainter {
   }
 
   _paintLine(Canvas canvas, Size size) {
-    canvas.drawRect(
-      Rect.fromPoints(Offset(0, 0), Offset(maxSize.width, maxSize.height)),
-      fillPainter,
-    );
+    //canvas.drawRect(
+    //  Rect.fromPoints(Offset(0, 0), Offset(maxSize.width, maxSize.height)),
+    //  fillPainter,
+    //);
+    Path path =
+        Path()
+          ..moveTo(maxSize.width / 2 - 10, 0)
+          ..lineTo(maxSize.width / 2 - 20, maxSize.height)
+          ..lineTo(maxSize.width / 2 + 20, maxSize.height)
+          ..lineTo(maxSize.width / 2 + 10, 0)
+          ..close();
+    canvas.drawPath(path, fillPainter);
   }
 
   @override
