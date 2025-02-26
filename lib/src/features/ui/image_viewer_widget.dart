@@ -7,7 +7,11 @@ class MovablePositionState extends StateNotifier<Map<String, dynamic>> {
   }
 
   void _initDefault() {
-    state = {'position': Offset.zero, 'zoom': 1.0, 'isLocked': true};
+    state = {
+      'position': Offset.zero,
+      'zoom': 1.0,
+      'isLocked': state['isLocked'],
+    };
   }
 
   void setLocked() {

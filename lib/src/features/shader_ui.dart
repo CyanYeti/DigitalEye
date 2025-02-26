@@ -76,6 +76,9 @@ class ShaderUI extends ConsumerWidget {
       ref.read(shaderProvider.notifier).getCurrentState('saturation/level') / 2,
     );
     saturationController.updateOption?.call(0);
+
+    //reset position
+    ref.read(movablePositionStateProvider.notifier).resetPosition();
   }
 
   void _toggleCameraFeed(WidgetRef ref) {

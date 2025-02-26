@@ -13,7 +13,6 @@ class FlipWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    print("built flip");
     final shaderSettings = ref.watch(shaderProvider);
 
     return ShaderBuilder(
