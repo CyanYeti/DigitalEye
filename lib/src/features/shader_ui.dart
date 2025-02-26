@@ -1,17 +1,17 @@
+import 'package:digitaleye/src/features/ui/advanced_slider_widget.dart';
 import 'package:digitaleye/src/features/ui/capture_button_widget.dart';
+import 'package:digitaleye/src/features/ui/contrast_slider_widget.dart';
 import 'package:digitaleye/src/features/ui/image_viewer_widget.dart';
 import 'package:digitaleye/src/features/ui/mode_controls_widget.dart';
+import 'package:digitaleye/src/features/ui/posterize_slider_widget.dart';
+import 'package:digitaleye/src/features/ui/saturation_slider_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
-import './ui/floating_button.dart';
 import './ui/color_picker.dart';
-import './camera/camera_mode_widget.dart';
 import './ui/area_indicator_widget.dart';
 import './camera/image_streamer_widget.dart';
 import 'package:digitaleye/src/features/ui/base_button_widget.dart';
-import 'dart:typed_data';
-import 'package:gal/gal.dart';
 
 class ShaderState extends StateNotifier<Map<String, dynamic>> {
   ShaderState() : super({}) {
@@ -55,30 +55,52 @@ final shaderProvider = StateNotifierProvider<ShaderState, Map<String, dynamic>>(
 class ShaderUI extends ConsumerWidget {
   ShaderUI({super.key});
 
-  final FloatingButtonController contrastController =
-      FloatingButtonController();
-  final FloatingButtonController saturationController =
-      FloatingButtonController();
-  final FloatingButtonController posterizeController =
-      FloatingButtonController();
-  final double posterizeSteps =
-      10.0; // Posterize starts at 2 value, so ten steps would give 2 -> 11
+  final AdvancedSliderController contrastController =
+      AdvancedSliderController();
+  final AdvancedSliderController saturationController =
+      AdvancedSliderController();
+  final AdvancedSliderController posterizeController =
+      AdvancedSliderController();
+  final AdvancedSliderController brightnessController =
+      AdvancedSliderController();
+  final AdvancedSliderController blurController = AdvancedSliderController();
+
+  // Posterize starts at 2 value, so ten steps would give 2 -> 11
+  final double posterizeSteps = 10.0;
+
+  // TODO: These should be a static const somewhere to sync across app
   final double leftPaddingSliders = 15;
   final double edgePadding = 15;
   final double columnPadding = 10;
 
   void resetAll(WidgetRef ref) {
     ref.read(shaderProvider.notifier).setDefaultShaderSettings();
+
     //reset contrast
     contrastController.updatePositionByPercent?.call(
       ref.read(shaderProvider.notifier).getCurrentState('contrast/level') / 2,
     );
     contrastController.updateOption?.call(0);
+
     //reset saturation
     saturationController.updatePositionByPercent?.call(
       ref.read(shaderProvider.notifier).getCurrentState('saturation/level') / 2,
     );
     saturationController.updateOption?.call(0);
+
+    //reset brightness
+    brightnessController.updatePositionByPercent?.call(
+      ref.read(shaderProvider.notifier).getCurrentState('brightness/level') / 2,
+    );
+
+    //reset blur
+    blurController.updatePositionByPercent?.call(
+      ref.read(shaderProvider.notifier).getCurrentState('blur/strength'),
+    );
+
+    //reset saturation
+    posterizeController.updatePositionByPercent?.call(0);
+    posterizeController.updateOption?.call(0);
 
     //reset position
     ref.read(movablePositionStateProvider.notifier).resetPosition();
@@ -174,171 +196,43 @@ class ShaderUI extends ConsumerWidget {
           child: Column(
             children: [
               // Contrast Slider
-              FloatingButton(
-                sliderStartPos: 0.5,
-                toggleIcons: [
-                  Icon(Icons.ac_unit),
-                  Icon(Icons.add),
-                  Icon(Icons.adjust),
-                  Icon(Icons.airline_stops),
-                ],
-                onTap: (option) {
-                  double newSettingPercent = 1.0;
-                  switch (option) {
-                    case 0:
-                      newSettingPercent = 1.0;
-                      break;
-                    case 1:
-                      newSettingPercent = 0.0;
-                      break;
-                    case 2:
-                      newSettingPercent = 0.5;
-                      break;
-                    case 3:
-                      newSettingPercent = 1.5;
-                      break;
-                  }
-                  ref
-                      .read(shaderProvider.notifier)
-                      .updateShaderSetting('contrast/level', newSettingPercent);
-                  contrastController.updatePositionByPercent?.call(
-                    newSettingPercent / 2,
-                  );
-                },
-                onChanged: (val) {
-                  ref
-                      .read(shaderProvider.notifier)
-                      .updateShaderSetting('contrast/level', 2 * val);
-                  contrastController.updateOption?.call(
-                    0,
-                  ); //reset icon to default, could be any but 0 is best
-                },
-                controller: contrastController,
-              ),
-
+              ContrastSliderWidget(controller: contrastController),
               SizedBox(height: columnPadding),
 
               // Saturation Slider
-              FloatingButton(
-                sliderStartPos: 0.5,
-                toggleIcons: [
-                  Icon(Icons.color_lens),
-                  Icon(Icons.color_lens_outlined),
-                  Icon(Icons.color_lens, color: Colors.yellowAccent),
-                ],
-                onTap: (option) {
-                  double newSettingPercent = 1.0;
-                  switch (option) {
-                    case 0:
-                      newSettingPercent = 1.0;
-                      break;
-                    case 1:
-                      newSettingPercent = 0.0;
-                      break;
-                    case 2:
-                      newSettingPercent = 2.0;
-                      break;
-                  }
-                  ref
-                      .read(shaderProvider.notifier)
-                      .updateShaderSetting(
-                        'saturation/level',
-                        newSettingPercent,
-                      );
-                  saturationController.updatePositionByPercent?.call(
-                    newSettingPercent / 2,
-                  );
-                },
-                onChanged: (val) {
-                  ref
-                      .read(shaderProvider.notifier)
-                      .updateShaderSetting('saturation/level', 2 * val);
-                  saturationController.updateOption?.call(0);
-                },
-                controller: saturationController,
-              ),
-
+              SaturationSliderWidget(controller: saturationController),
               SizedBox(height: columnPadding),
 
+              // WARN: If these get to big break them into other files
               // Brightness Slider
-              FloatingButton(
+              AdvancedSliderWidget(
                 sliderStartPos: 0.5,
                 onChanged: (val) {
                   ref
                       .read(shaderProvider.notifier)
                       .updateShaderSetting('brightness/level', 2 * val);
                 },
+                controller: brightnessController,
               ),
 
               SizedBox(height: columnPadding),
 
               // Posterize slider
-              FloatingButton(
-                sliderStartPos: 0.0,
-                steps: posterizeSteps,
-                toggleIcons: [
-                  Icon(Icons.expand_sharp),
-                  Icon(Icons.looks_two_rounded),
-                  Icon(Icons.looks_3_rounded),
-                  Icon(Icons.looks_5_rounded),
-                  Icon(Icons.nine_k),
-                ],
-                onTap: (option) {
-                  double steps = 0.0;
-                  switch (option) {
-                    case 0:
-                      ref
-                          .read(shaderProvider.notifier)
-                          .updateShaderSetting('posterize/toRender', false);
-                      break;
-                    case 1:
-                      steps = 1.0;
-                      break;
-                    case 2:
-                      steps = 2.0;
-                      break;
-                    case 3:
-                      steps = 4.0;
-                      break;
-                    case 4:
-                      steps = 8.0;
-                      break;
-                  }
-                  if (steps != 0.0) {
-                    ref
-                        .read(shaderProvider.notifier)
-                        .updateShaderSetting('posterize/toRender', true);
-                    ref
-                        .read(shaderProvider.notifier)
-                        .updateShaderSetting('posterize/steps', steps);
-                    posterizeController.updatePositionByPercent?.call(
-                      ((steps - 1) / (posterizeSteps - 1)).toDouble(),
-                    );
-                  }
-                },
-                onChanged: (val) {
-                  double steps =
-                      (val * (posterizeSteps - 1) + 1).round().toDouble();
-                  ref
-                      .read(shaderProvider.notifier)
-                      .updateShaderSetting('posterize/toRender', true);
-                  ref
-                      .read(shaderProvider.notifier)
-                      .updateShaderSetting('posterize/steps', steps);
-                },
+              PosterizeSliderWidget(
                 controller: posterizeController,
+                posterizeSteps: posterizeSteps,
               ),
-
               SizedBox(height: columnPadding),
 
               // Blur Slider
-              FloatingButton(
+              AdvancedSliderWidget(
                 sliderStartPos: 0.0,
                 onChanged: (val) {
                   ref
                       .read(shaderProvider.notifier)
                       .updateShaderSetting('blur/strength', val);
                 },
+                controller: blurController,
               ),
             ],
           ),

@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
+class AdvancedSliderController {
+  void Function(double percent)? updatePositionByPercent;
+  void Function(int option)? updateOption;
+}
+
 // A button widget that opens a simple percent slider
 // and on tap cycle options and icons
-class FloatingButton extends StatefulWidget {
+class AdvancedSliderWidget extends StatefulWidget {
   final double sliderWidth;
   final double sliderHeight;
   final double sliderStartPos;
@@ -14,9 +19,9 @@ class FloatingButton extends StatefulWidget {
   final Function()? onDrag;
   final List<dynamic> toggleIcons;
   final double? steps;
-  final FloatingButtonController? controller;
+  final AdvancedSliderController? controller;
 
-  FloatingButton({
+  AdvancedSliderWidget({
     this.sliderWidth = 50,
     this.sliderHeight = 300,
     this.sliderStartPos = 1.0,
@@ -24,21 +29,16 @@ class FloatingButton extends StatefulWidget {
     this.sliderBackgroundColor = Colors.blueGrey,
     this.onTap,
     this.onDrag,
-    this.toggleIcons = const <dynamic>[],
+    this.toggleIcons = const <IconData>[],
     this.controller,
     this.steps,
     required this.onChanged,
   });
   @override
-  _FloatingButtonState createState() => _FloatingButtonState();
+  _AdvancedSliderWidgetState createState() => _AdvancedSliderWidgetState();
 }
 
-class FloatingButtonController {
-  void Function(double percent)? updatePositionByPercent;
-  void Function(int option)? updateOption;
-}
-
-class _FloatingButtonState extends State<FloatingButton> {
+class _AdvancedSliderWidgetState extends State<AdvancedSliderWidget> {
   OverlayEntry? entry;
   GlobalKey baseKey = GlobalKey();
 
@@ -62,7 +62,6 @@ class _FloatingButtonState extends State<FloatingButton> {
   }
 
   _handleChanged(double val) {
-    assert(widget.onChanged != null);
     widget.onChanged(val);
   }
 
@@ -79,7 +78,7 @@ class _FloatingButtonState extends State<FloatingButton> {
     setState(() {
       _dragPosition = newDragPosition;
       _dragPercentage = _dragPosition / widget.sliderHeight;
-      _repaint.notifyListeners();
+      //_repaint.notifyListeners();
     });
 
     _dragDiff = val;

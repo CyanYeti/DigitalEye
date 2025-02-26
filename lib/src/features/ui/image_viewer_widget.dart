@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class MovablePositionState extends StateNotifier<Map<String, dynamic>> {
   MovablePositionState() : super({}) {
+    state = {'isLocked': true};
     _initDefault();
   }
 
