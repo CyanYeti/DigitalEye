@@ -90,7 +90,6 @@ class _CameraModeWidgetState extends ConsumerState<CameraModeWidget> {
   @override
   Widget build(BuildContext context) {
     imageMode = ref.watch(imageStreamerModeProvider);
-    print(imageMode);
     return Builder(
       builder: (context) {
         switch (imageMode) {
@@ -110,7 +109,6 @@ class _CameraModeWidgetState extends ConsumerState<CameraModeWidget> {
             return FutureBuilder(
               future: _selectFile(ref),
               builder: (context, snapshot) {
-                print(snapshot.data);
                 if (snapshot.data == null ||
                     snapshot.connectionState != ConnectionState.done) {
                   return CircularProgressIndicator();

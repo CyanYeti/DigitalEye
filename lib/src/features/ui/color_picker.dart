@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:flutter/foundation.dart';
-import 'package:camera/camera.dart';
 import 'dart:math';
-import 'dart:typed_data';
 import 'dart:convert';
 import 'dart:ui' as ui;
-import 'package:image/image.dart' as img;
 import 'package:flutter/services.dart' show rootBundle;
 import '../camera/image_streamer_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -58,17 +53,17 @@ class MutableColor {
   int a = 0;
 
   MutableColor() {
-    this.r = 0;
-    this.g = 0;
-    this.b = 0;
-    this.a = 0;
+    r = 0;
+    g = 0;
+    b = 0;
+    a = 0;
   }
 
   MutableColor.withValues(int r, int g, int b, int a) {
-    this.r = r;
-    this.g = g;
-    this.b = b;
-    this.a = a;
+    r = r;
+    g = g;
+    b = b;
+    a = a;
   }
 
   Color toColor() {
@@ -109,9 +104,9 @@ class ColorPicker extends ConsumerWidget {
       return "Loading";
     }
     final String hexCode =
-        '#${(color!.r * 255).round().toRadixString(16).padLeft(2, '0')}'
-        '${(color!.g * 255).round().toRadixString(16).padLeft(2, '0')}'
-        '${(color!.b * 255).round().toRadixString(16).padLeft(2, '0')}';
+        '#${(color.r * 255).round().toRadixString(16).padLeft(2, '0')}'
+        '${(color.g * 255).round().toRadixString(16).padLeft(2, '0')}'
+        '${(color.b * 255).round().toRadixString(16).padLeft(2, '0')}';
 
     return hexCode;
   }
@@ -163,9 +158,6 @@ class ColorPicker extends ConsumerWidget {
     final byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
     if (byteData == null) return null;
     image.dispose();
-
-    int startIndex = ((pt1.dy.toInt() * width) + pt1.dx.toInt()) * 4;
-    int endIndex = ((pt2.dy.toInt() * width) + pt2.dx.toInt()) * 4;
 
     MutableColor runningColor = MutableColor();
     int pixelCount = 0;
@@ -258,7 +250,7 @@ class ColorPicker extends ConsumerWidget {
     WidgetRef ref, [
     Size? size,
   ]) async {
-    switch (ref.read(colorPickerProvider.notifier).state["pickerMode"]) {
+    switch (ref.read(colorPickerProvider)["pickerMode"]) {
       case ColorPickerMode.simple:
         return await _getPixelColor(image, ref);
       case ColorPickerMode.area:
@@ -270,6 +262,7 @@ class ColorPicker extends ConsumerWidget {
           Offset(size.width ~/ 2 + 10, size.height ~/ 2 + 10),
         );
     }
+    return null;
   }
 
   Future<void> _launchWikiURL(String? urlString) async {
@@ -284,7 +277,7 @@ class ColorPicker extends ConsumerWidget {
 
   void _cycleMode(BuildContext context, WidgetRef ref) {
     final ColorPickerMode previous =
-        ref.read(colorPickerProvider.notifier).state["pickerMode"];
+        ref.read(colorPickerProvider)["pickerMode"];
 
     // Set new mode, refresh indicator
     ref
@@ -317,10 +310,7 @@ class ColorPicker extends ConsumerWidget {
                 future: _selectMode(image, ref, size),
                 builder: (context, snapshot) {
                   final Color pickedColor =
-                      snapshot.data ??
-                      ref
-                          .read(colorPickerProvider.notifier)
-                          .state["previousColor"];
+                      snapshot.data ?? colorPickerSetting["previousColor"];
 
                   return ColoredBox(
                     color: pickedColor,
@@ -345,12 +335,7 @@ class ColorPicker extends ConsumerWidget {
                                           FutureBuilder(
                                             future: _getColorName(
                                               pickedColor,
-                                              ref
-                                                  .read(
-                                                    colorPickerProvider
-                                                        .notifier,
-                                                  )
-                                                  .state["colorSet"],
+                                              colorPickerSetting["colorSet"],
                                             ),
                                             builder: (context, colorName) {
                                               return Text(
@@ -386,7 +371,7 @@ class ColorPicker extends ConsumerWidget {
                         // Buttons
                         Positioned(
                           right: edgePadding,
-                          bottom: edgePadding,
+                          top: edgePadding,
                           child: FloatingActionButton(
                             onPressed: () {
                               _cycleMode(context, ref);
@@ -396,14 +381,12 @@ class ColorPicker extends ConsumerWidget {
                         ),
                         Positioned(
                           left: edgePadding,
-                          bottom: edgePadding,
+                          top: edgePadding,
                           child: FloatingActionButton(
                             onPressed: () async {
                               final data = await _findClosestColorData(
                                 pickedColor,
-                                ref
-                                    .read(colorPickerProvider.notifier)
-                                    .state["colorSet"],
+                                colorPickerSetting["colorSet"],
                               );
                               _launchWikiURL(data["wiki_link"]);
                             },

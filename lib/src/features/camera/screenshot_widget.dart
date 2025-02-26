@@ -49,7 +49,7 @@ class _ScreenshotWidgetState extends State<ScreenshotWidget> {
           });
         })
         .catchError((onError) {
-          print(onError);
+          debugPrint(onError);
         });
   }
 
