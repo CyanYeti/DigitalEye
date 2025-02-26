@@ -1,12 +1,14 @@
 import 'package:digitaleye/src/features/ui/image_viewer_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hugeicons/hugeicons.dart';
 import './ui/floating_button.dart';
 import './ui/color_picker.dart';
 import './camera/screenshot_widget.dart';
 import './camera/camera_mode_widget.dart';
 import './ui/area_indicator_widget.dart';
 import './camera/image_streamer_widget.dart';
+import 'package:digitaleye/src/features/ui/base_button_widget.dart';
 import 'dart:typed_data';
 import 'package:gal/gal.dart';
 
@@ -403,6 +405,16 @@ class ShaderUI extends ConsumerWidget {
                 },
               ),
             ],
+          ),
+        ),
+        // TODO: REMOVE THIS IS IT TEMP
+        Positioned(
+          child: Align(
+            alignment: Alignment.center,
+            child: BaseButtonWidget(
+              icon: HugeIcons.strokeRoundedPlayCircle,
+              mini: false,
+            ),
           ),
         ),
       ],
