@@ -8,27 +8,25 @@ import './blur_widget.dart';
 import '../shader_ui.dart';
 
 class ContrastWidget extends ConsumerWidget {
-    ContrastWidget({super.key});
-    
-    final BlurWidget blurWidget = BlurWidget();
+  ContrastWidget({super.key});
 
-    @override
-    Widget build(BuildContext context, WidgetRef ref) {
-        final shaderSettings = ref.watch(shaderProvider);
+  final BlurWidget blurWidget = BlurWidget();
 
-        return ShaderBuilder(
-            assetKey: 'shaders/contrast.frag',
-            (BuildContext context, FragmentShader shader, _) => AnimatedSampler(
-                (ui.Image image, Size size, Canvas canvas) {
-                    shader
-                        ..setFloat(0, size.width)
-                        ..setFloat(1, size.height)
-                        ..setFloat(2, shaderSettings['contrast/level'] ?? 1)
-                        ..setImageSampler(0, image);
-                    canvas.drawRect(Offset.zero & size, Paint()..shader = shader);
-                },
-                child: blurWidget,
-            ),
-        );
-    }
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final shaderSettings = ref.watch(shaderProvider);
+
+    return ShaderBuilder(
+      assetKey: 'shaders/contrast.frag',
+      (BuildContext context, FragmentShader shader, _) =>
+          AnimatedSampler((ui.Image image, Size size, Canvas canvas) {
+            shader
+              ..setFloat(0, size.width)
+              ..setFloat(1, size.height)
+              ..setFloat(2, shaderSettings['contrast/level'] ?? 1)
+              ..setImageSampler(0, image);
+            canvas.drawRect(Offset.zero & size, Paint()..shader = shader);
+          }, child: blurWidget),
+    );
+  }
 }

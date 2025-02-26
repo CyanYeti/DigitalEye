@@ -6,68 +6,68 @@ import './image_streamer_widget.dart';
 import 'dart:typed_data';
 
 class ScreenshotWidget extends StatefulWidget {
-    const ScreenshotWidget({super.key});
+  const ScreenshotWidget({super.key});
 
-    @override
-    _ScreenshotWidgetState createState() => _ScreenshotWidgetState();
+  @override
+  _ScreenshotWidgetState createState() => _ScreenshotWidgetState();
 }
 
 class _ScreenshotWidgetState extends State<ScreenshotWidget> {
-    Uint8List? _imageFile;
-    ScreenshotController ssController = ScreenshotController();
+  Uint8List? _imageFile;
+  ScreenshotController ssController = ScreenshotController();
 
-    @override
-    void initState() {
-        super.initState();
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  void saveImage() async {
+    final hasAccess = await Gal.hasAccess(toAlbum: true);
+
+    if (!hasAccess) {
+      await Gal.requestAccess(toAlbum: true);
     }
 
-    @override
-    void dispose() {
-        super.dispose();
-    }
+    await Gal.putImageBytes(_imageFile!);
 
-    void saveImage() async {
-        final hasAccess = await Gal.hasAccess(toAlbum: true);
+    Gal.open();
+  }
 
-        if (!hasAccess) {
-            await Gal.requestAccess(toAlbum: true);
-        }
-
-        await Gal.putImageBytes(_imageFile!);
-
-        Gal.open();
-    }
-
-    void captureScreenshot() {
-        ssController.capture().then((Uint8List? image) {
-            //Capture Done
-            setState(() {
-                _imageFile = image;
-                saveImage();
-            });
-        }).catchError((onError) {
-            print(onError);
+  void captureScreenshot() {
+    ssController
+        .capture()
+        .then((Uint8List? image) {
+          //Capture Done
+          setState(() {
+            _imageFile = image;
+            saveImage();
+          });
+        })
+        .catchError((onError) {
+          print(onError);
         });
-    }
+  }
 
-    @override
-    Widget build(BuildContext context) {
-        final Size screenSize = MediaQuery.of(context).size;
-        return Stack(
-            children: [
-                Screenshot(
-                    controller: ssController,
-                    child: ImageStreamer(),
-                ),
-                Positioned(
-                    bottom: 10,
-                    left: screenSize.width / 2 - 25,
-                    child: FloatingActionButton(
-                        onPressed: () => captureScreenshot(),
-                        child: Icon(Icons.camera),
-                    ),
-                ),
-            ],
-        );
-    }
+  @override
+  Widget build(BuildContext context) {
+    final Size screenSize = MediaQuery.of(context).size;
+    return Stack(
+      children: [
+        Screenshot(controller: ssController, child: ImageStreamer()),
+        Positioned(
+          bottom: 10,
+          left: screenSize.width / 2 - 25,
+          child: FloatingActionButton(
+            onPressed: () => captureScreenshot(),
+            child: Icon(Icons.camera),
+          ),
+        ),
+      ],
+    );
+  }
 }

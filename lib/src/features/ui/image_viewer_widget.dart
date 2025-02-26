@@ -42,10 +42,12 @@ class _ImageViewerWidgetState extends ConsumerState<ImageViewerWidget> {
       zoom = previousZoom * details.scale;
       zoom = zoom.clamp(.5, 10);
     }
+    setState(() {});
   }
 
   void _handleDoubleTap() {
     _resetTransform();
+    setState(() {});
   }
 
   void _resetTransform() {
@@ -61,22 +63,30 @@ class _ImageViewerWidgetState extends ConsumerState<ImageViewerWidget> {
     // have empty space be filled with default texture
     return Stack(
       children: [
+        Positioned(
+          child: Align(
+            alignment: Alignment.center,
+            child: SizedBox.expand(
+              child: GestureDetector(
+                onDoubleTap: () => _handleDoubleTap(),
+                child: ColoredBox(color: Colors.grey),
+              ),
+            ),
+          ),
+        ),
         Positioned.fill(
           child: Align(
             alignment: Alignment.center,
-            child: TapRegion(
-              onTapOutside: (details) => _resetTransform(),
-              child: GestureDetector(
-                onDoubleTap: () => _handleDoubleTap(),
-                onScaleStart: (details) => _handleScaleStart(details),
-                onScaleUpdate: (details) => _handleScaleUpdate(details),
-                child: SizedBox.expand(
-                  child: Transform.translate(
-                    offset: position,
-                    child: Transform.scale(
-                      scale: zoom,
-                      child: RawImage(image: image),
-                    ),
+            child: GestureDetector(
+              onDoubleTap: () => _handleDoubleTap(),
+              onScaleStart: (details) => _handleScaleStart(details),
+              onScaleUpdate: (details) => _handleScaleUpdate(details),
+              child: SizedBox.expand(
+                child: Transform.translate(
+                  offset: position,
+                  child: Transform.scale(
+                    scale: zoom,
+                    child: RawImage(image: image),
                   ),
                 ),
               ),

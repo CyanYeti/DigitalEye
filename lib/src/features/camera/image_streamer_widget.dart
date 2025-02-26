@@ -12,39 +12,37 @@ enum ImageMode { play, pause }
 
 // This is just to provide the stream with the render objects key.
 final screenshotGlobalKeyProvider = Provider<GlobalKey>((ref) {
-    return GlobalKey();
+  return GlobalKey();
 });
 
 final screenImageProvider = StreamProvider.autoDispose<ui.Image>((ref) async* {
-    //final ssController = ref.read(screenshotControllerProvider);
-    final globalKey = ref.read(screenshotGlobalKeyProvider);
+  //final ssController = ref.read(screenshotControllerProvider);
+  final globalKey = ref.read(screenshotGlobalKeyProvider);
 
-    while (true) {
-        // Throttle stream
-        await Future.delayed(Duration(milliseconds: 20));
-        try {
-            final RenderRepaintBoundary boundary = globalKey.currentContext!.findRenderObject()! as RenderRepaintBoundary;
-            final ui.Image image = await boundary.toImage();
-            yield image;
-            // This would let us broadcast a image. Since the other side is looking for an image, trying to save time on it
-            //final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-            //final Uint8List pngBytes = byteData!.buffer.asUint8List();
-        } catch (e) {
-            debugPrint("Error capturing screenshot in ImageStreamer");
-        }
+  while (true) {
+    // Throttle stream
+    await Future.delayed(Duration(milliseconds: 20));
+    try {
+      final RenderRepaintBoundary boundary =
+          globalKey.currentContext!.findRenderObject()!
+              as RenderRepaintBoundary;
+      final ui.Image image = await boundary.toImage();
+      yield image;
+      // This would let us broadcast a image. Since the other side is looking for an image, trying to save time on it
+      //final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      //final Uint8List pngBytes = byteData!.buffer.asUint8List();
+    } catch (e) {
+      debugPrint("Error capturing screenshot in ImageStreamer");
     }
+  }
 });
 
 class ImageStreamer extends ConsumerWidget {
-    Uint8List? _imageFile;
-    //GlobalKey globalKey = GlobalKey();
+  //GlobalKey globalKey = GlobalKey();
 
-    Widget build(BuildContext context, WidgetRef ref) {
-        //final ssController = ref.read(screenshotControllerProvider);
-        final globalKey = ref.read(screenshotGlobalKeyProvider);
-        return RepaintBoundary(
-            key: globalKey,
-            child: PosterizeWidget(),
-        );
-    }
+  Widget build(BuildContext context, WidgetRef ref) {
+    //final ssController = ref.read(screenshotControllerProvider);
+    final globalKey = ref.watch(screenshotGlobalKeyProvider);
+    return RepaintBoundary(key: globalKey, child: PosterizeWidget());
+  }
 }

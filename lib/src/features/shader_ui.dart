@@ -74,7 +74,7 @@ class ShaderUI extends ConsumerWidget {
 
   void _toggleCameraFeed(WidgetRef ref) {
     final ImageMode imageMode = ref.read(imageStreamerModeProvider);
-    if (imageMode == ImageMode.still) {
+    if (imageMode == ImageMode.freezed || imageMode == ImageMode.selection) {
       _startCameraFeed(ref);
     } else {
       _pauseCameraFeed(ref);
@@ -82,7 +82,7 @@ class ShaderUI extends ConsumerWidget {
   }
 
   void _pauseCameraFeed(WidgetRef ref) {
-    ref.read(imageStreamerModeProvider.notifier).state = ImageMode.still;
+    ref.read(imageStreamerModeProvider.notifier).state = ImageMode.freezed;
   }
 
   void _startCameraFeed(WidgetRef ref) {
@@ -90,23 +90,22 @@ class ShaderUI extends ConsumerWidget {
   }
 
   void _startImageSelect(WidgetRef ref) {
-    ref.read(imageStreamerModeProvider.notifier).state = ImageMode.select;
+    ref.read(imageStreamerModeProvider.notifier).state = ImageMode.camera;
+    ref.read(imageStreamerModeProvider.notifier).state = ImageMode.selection;
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // ignore: unused_local_variable
-    final colorPickerWatcher = ref.watch(colorPickerProvider);
-    final colorPickerMode =
-        ref.read(colorPickerProvider.notifier).getColorPickerMode();
-    //colorPickerWatcher["pickerMode"];
+    //final colorPickerWatcher = ref.watch(colorPickerProvider);
+    final colorPickerMode = ref.watch(colorPickerProvider)["pickerMode"];
     final Size indicatorSize = Size.square(20);
     final Size screenSize = MediaQuery.of(context).size;
 
     return Stack(
       children: [
         // Camera and filter stack
-        ScreenshotWidget(),
+        const ScreenshotWidget(),
         // flip and reset controls
         Positioned(
           bottom: edgePadding,
@@ -153,7 +152,7 @@ class ShaderUI extends ConsumerWidget {
           ),
         ),
         // Color picker
-        Positioned(top: 0, right: 0, left: 0, child: ColorPicker()),
+        Positioned(top: 0, right: 0, left: 0, child: const ColorPicker()),
         Positioned.fill(
           child: Align(
             alignment: Alignment.center,
@@ -164,6 +163,8 @@ class ShaderUI extends ConsumerWidget {
                     return AreaIndicatorWidget.crosshair(size: indicatorSize);
                   case ColorPickerMode.area:
                     return AreaIndicatorWidget.rect(size: indicatorSize);
+                  default:
+                    return AreaIndicatorWidget.crosshair(size: indicatorSize);
                 }
               },
             ),

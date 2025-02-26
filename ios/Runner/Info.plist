@@ -29,6 +29,12 @@
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
 	<key>UISupportedInterfaceOrientations</key>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Select previous image to view and edit</string>
+	<key>NSCameraUsageDescription</key>
+	<string>See camera feed for live edits</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Extra permission needed by Camera</string>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
