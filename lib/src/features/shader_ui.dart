@@ -19,6 +19,8 @@ class ShaderState extends StateNotifier<Map<String, dynamic>> {
       'brightness/level': 1.0,
       'contrast/level': 1.0,
       'blur/strength': 0.0,
+      'flip/horizontal': 0.0,
+      'flip/vertical': 0.0,
     };
   }
 
@@ -113,12 +115,24 @@ class ShaderUI extends ConsumerWidget {
           child: Column(
             children: [
               FloatingActionButton(
-                onPressed: () => resetAll(ref),
+                onPressed:
+                    () => ref
+                        .read(shaderProvider.notifier)
+                        .updateShaderSetting(
+                          'flip/horizontal',
+                          1.0 - ref.read(shaderProvider)['flip/horizontal'],
+                        ),
                 child: Icon(Icons.swap_horiz),
               ),
               SizedBox(height: columnPadding),
               FloatingActionButton(
-                onPressed: () => resetAll(ref),
+                onPressed:
+                    () => ref
+                        .read(shaderProvider.notifier)
+                        .updateShaderSetting(
+                          'flip/vertical',
+                          1.0 - ref.read(shaderProvider)['flip/vertical'],
+                        ),
                 child: Icon(Icons.swap_vert),
               ),
               SizedBox(height: columnPadding),

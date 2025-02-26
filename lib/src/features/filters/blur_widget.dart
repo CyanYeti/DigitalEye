@@ -15,7 +15,6 @@ class BlurWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final shaderSettings = ref.watch(shaderProvider);
-    final double strength = 1.0;
 
     return Builder(
       builder: (context) {
