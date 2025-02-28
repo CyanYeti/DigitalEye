@@ -74,6 +74,8 @@ class _MovableViewerWidgetState extends ConsumerState<MovableViewerWidget> {
       previousZoom = ref.read(movablePositionStateProvider)['zoom'];
     }
   }
+  // TODO: zoom into the focal point
+  //TODO: Why does posterize re open select
 
   void _handleScaleUpdate(ScaleUpdateDetails details) {
     if (ref.read(movablePositionStateProvider.notifier)._isLocked()) {

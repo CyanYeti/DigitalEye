@@ -18,22 +18,22 @@ class PosterizeWidget extends ConsumerWidget {
 
     return Builder(
       builder: (context) {
-        if (shaderSettings['posterize/toRender'] ?? false) {
-          return ShaderBuilder(
-            assetKey: 'shaders/posterize.frag',
-            (BuildContext context, FragmentShader shader, _) =>
-                AnimatedSampler((ui.Image image, Size size, Canvas canvas) {
-                  shader
-                    ..setFloat(0, size.width)
-                    ..setFloat(1, size.height)
-                    ..setFloat(2, shaderSettings['posterize/steps'] ?? 1)
-                    ..setImageSampler(0, image);
-                  canvas.drawRect(Offset.zero & size, Paint()..shader = shader);
-                }, child: brightnessWidget),
-          );
-        } else {
-          return brightnessWidget;
-        }
+        return ShaderBuilder(
+          assetKey: 'shaders/posterize.frag',
+          (BuildContext context, FragmentShader shader, _) => AnimatedSampler((
+            ui.Image image,
+            Size size,
+            Canvas canvas,
+          ) {
+            shader
+              ..setFloat(0, size.width)
+              ..setFloat(1, size.height)
+              ..setFloat(2, shaderSettings['posterize/steps'] ?? 1)
+              ..setFloat(3, shaderSettings['posterize/toRender'] ? 1.0 : 0.0)
+              ..setImageSampler(0, image);
+            canvas.drawRect(Offset.zero & size, Paint()..shader = shader);
+          }, child: brightnessWidget),
+        );
       },
     );
   }

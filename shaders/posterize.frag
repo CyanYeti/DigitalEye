@@ -3,6 +3,7 @@
 
 uniform vec2 uSize;
 uniform float steps;
+uniform float toRender;
 uniform sampler2D uTexture;
 
 out vec4 fragColor;
@@ -34,4 +35,7 @@ void main() {
     float adjustment = level / greyscaledHSV.b;
 
     fragColor.rgb = fragColor.rgb * adjustment;
+    if (toRender == 0.0) {
+        fragColor = texture(uTexture, uv);
+    }
 }

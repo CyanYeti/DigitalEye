@@ -78,13 +78,15 @@ class _CameraModeWidgetState extends ConsumerState<CameraModeWidget> {
             image = info.image;
           });
         });
+      } else {
+        // We failed to get image, reset mode
+        ref.read(imageStreamerModeProvider.notifier).state = ImageMode.camera;
       }
     } catch (e) {
       debugPrint("Error picking image: $e");
     }
     _pickerActive = false;
     return image;
-    return null;
   }
 
   @override
