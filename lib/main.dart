@@ -1,3 +1,4 @@
+import 'package:digitaleye/src/features/default_text_wrapper_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import './src/features/shader_ui.dart';
@@ -19,7 +20,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData.dark(),
       debugShowCheckedModeBanner: false,
       //home: const CameraWidget(),
-      home: ProviderScope(child: ShaderUI()),
+      home: ProviderScope(child: DefaultTextWrapperWidget(child: ShaderUI())),
       //home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }

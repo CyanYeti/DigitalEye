@@ -330,39 +330,35 @@ class ColorPicker extends ConsumerWidget {
                                 child: Padding(
                                   padding: EdgeInsets.all(5.0),
                                   child: Center(
-                                    child: DefaultTextStyle(
-                                      style: TextStyle(color: Colors.white),
-                                      child: Column(
-                                        children: [
-                                          FutureBuilder(
-                                            future: _getColorName(
-                                              pickedColor,
-                                              colorPickerSetting["colorSet"],
-                                            ),
-                                            builder: (context, colorName) {
-                                              return Text(
-                                                colorName.data ?? "Loading...",
-                                                style: TextStyle(
-                                                  color:
-                                                      _findComplementaryColor(
-                                                        pickedColor,
-                                                      ),
-                                                  fontSize: 15.0,
+                                    child: Column(
+                                      children: [
+                                        FutureBuilder(
+                                          future: _getColorName(
+                                            pickedColor,
+                                            colorPickerSetting["colorSet"],
+                                          ),
+                                          builder: (context, colorName) {
+                                            return Text(
+                                              colorName.data ?? "Loading...",
+                                              style: TextStyle(
+                                                color: _findComplementaryColor(
+                                                  pickedColor,
                                                 ),
-                                              );
-                                            },
-                                          ),
-                                          Text(
-                                            _colorHexCode(pickedColor),
-                                            style: TextStyle(
-                                              color: _findBWComplement(
-                                                pickedColor,
+                                                fontSize: 15.0,
                                               ),
-                                              fontSize: 4.0,
+                                            );
+                                          },
+                                        ),
+                                        Text(
+                                          _colorHexCode(pickedColor),
+                                          style: TextStyle(
+                                            color: _findBWComplement(
+                                              pickedColor,
                                             ),
+                                            fontSize: 4.0,
                                           ),
-                                        ],
-                                      ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),

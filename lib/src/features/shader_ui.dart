@@ -1,6 +1,7 @@
 import 'package:digitaleye/src/features/ui/advanced_slider_widget.dart';
 import 'package:digitaleye/src/features/ui/capture_button_widget.dart';
 import 'package:digitaleye/src/features/ui/contrast_slider_widget.dart';
+import 'package:digitaleye/src/features/ui/hideable_color_picker_widget.dart';
 import 'package:digitaleye/src/features/ui/image_viewer_widget.dart';
 import 'package:digitaleye/src/features/ui/mode_controls_widget.dart';
 import 'package:digitaleye/src/features/ui/posterize_slider_widget.dart';
@@ -169,7 +170,13 @@ class ShaderUI extends ConsumerWidget {
           child: ModeControlsWidget(columnPadding: columnPadding),
         ),
         // Color picker
-        Positioned(top: 0, right: 0, left: 0, child: const ColorPicker()),
+        Positioned(
+          top: 0,
+          right: 0,
+          left: 0,
+          child: HideableColorPickerWidget(edgePadding: edgePadding),
+        ),
+        //Positioned(top: 0, right: 0, left: 0, child: const ColorPicker()),
         Positioned.fill(
           child: Align(
             alignment: Alignment.center,
