@@ -9,11 +9,14 @@ class IconTextPairWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        HugeIcon(icon: icon, color: ColorPalette.bright1, size: 30),
-        Text(label),
-      ],
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        children: [
+          HugeIcon(icon: icon, color: ColorPalette.bright1, size: 30),
+          Text(label),
+        ],
+      ),
     );
   }
 }

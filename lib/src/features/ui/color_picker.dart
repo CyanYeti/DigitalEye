@@ -1,3 +1,4 @@
+import 'package:digitaleye/src/color_palette.dart';
 import 'package:digitaleye/src/features/ui/base_button_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -99,6 +100,14 @@ class ColorPicker extends ConsumerWidget {
       return Colors.white;
     }
     return Colors.black;
+  }
+
+  Color _findAppropriateTextColor(Color baseColor) {
+    HSVColor baseHSV = HSVColor.fromColor(baseColor);
+    if (baseHSV.value < 0.5) {
+      return ColorPalette.bright1;
+    }
+    return ColorPalette.dark1;
   }
 
   String _colorHexCode(Color? color) {
@@ -341,9 +350,10 @@ class ColorPicker extends ConsumerWidget {
                                             return Text(
                                               colorName.data ?? "Loading...",
                                               style: TextStyle(
-                                                color: _findComplementaryColor(
-                                                  pickedColor,
-                                                ),
+                                                color:
+                                                    _findAppropriateTextColor(
+                                                      pickedColor,
+                                                    ),
                                                 fontSize: 15.0,
                                               ),
                                             );
@@ -352,10 +362,10 @@ class ColorPicker extends ConsumerWidget {
                                         Text(
                                           _colorHexCode(pickedColor),
                                           style: TextStyle(
-                                            color: _findBWComplement(
+                                            color: _findAppropriateTextColor(
                                               pickedColor,
                                             ),
-                                            fontSize: 4.0,
+                                            fontSize: 10.0,
                                           ),
                                         ),
                                       ],

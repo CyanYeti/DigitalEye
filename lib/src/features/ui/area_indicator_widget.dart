@@ -1,3 +1,4 @@
+import 'package:digitaleye/src/color_palette.dart';
 import 'package:flutter/material.dart';
 
 enum IndicatorShape { crosshair, rectangle, circle, multipoint }
