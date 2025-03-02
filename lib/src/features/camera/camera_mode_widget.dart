@@ -104,7 +104,6 @@ class _CameraModeWidgetState extends ConsumerState<CameraModeWidget> {
                 if (snapshot.data == null) {
                   return CircularProgressIndicator();
                 }
-                return SizedBox.expand(child: ColoredBox(color: Colors.purple));
                 return RawImage(image: snapshot.data!);
               },
             );

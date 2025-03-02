@@ -25,7 +25,6 @@ final screenImageProvider = StreamProvider.autoDispose<ui.Image>((ref) async* {
   bool isActive = true;
   ref.onDispose(() {
     isActive = false;
-    print("disposed");
   });
 
   while (isActive) {

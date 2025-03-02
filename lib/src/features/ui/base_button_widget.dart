@@ -59,7 +59,6 @@ class _BaseButtonWidgetState extends State<BaseButtonWidget> {
   }
 
   void _handleOnTapCancel() {
-    print("canceled");
     iconColor = ColorPalette.bright1;
     buttonColorDark = ColorPalette.dark1;
     buttonColorLight = ColorPalette.dark2;

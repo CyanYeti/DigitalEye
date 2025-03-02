@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:digitaleye/src/color_palette.dart';
 import 'package:digitaleye/src/features/ui/base_button_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -158,7 +159,7 @@ class _AdvancedSliderWidgetState extends State<AdvancedSliderWidget> {
                 //child: Image.asset('assets/Gradient.png'),
                 child: CustomPaint(
                   foregroundPainter: SliderBarPainter(
-                    color: widget.sliderColor,
+                    color: ColorPalette.bright1,
                     //sliderPosition: _dragPosition,
                     sliderPosition:
                         (widget.steps != null && widget.steps! > 0.0)
@@ -177,7 +178,7 @@ class _AdvancedSliderWidgetState extends State<AdvancedSliderWidget> {
                     repaint: _repaint,
                   ),
                   painter: SliderPainter(
-                    color: widget.sliderBackgroundColor,
+                    color: ColorPalette.dark1,
                     maxSize: Size(widget.sliderWidth, widget.sliderHeight),
                   ),
                 ),
@@ -192,7 +193,6 @@ class _AdvancedSliderWidgetState extends State<AdvancedSliderWidget> {
   }
 
   void _handleOnTap() {
-    print("Saw Tap");
     _updateOption(currentOption + 1);
 
     widget.onTap?.call(currentOption);
@@ -259,7 +259,7 @@ class SliderBarPainter extends CustomPainter {
   }) : linePainter =
            Paint()
              ..color = color
-             ..style = PaintingStyle.stroke
+             ..style = PaintingStyle.fill
              ..strokeWidth = 2.5;
 
   @override
@@ -268,11 +268,7 @@ class SliderBarPainter extends CustomPainter {
   }
 
   _paintLine(Canvas canvas, Size size) {
-    canvas.drawLine(
-      Offset(0, sliderPosition),
-      Offset(width, sliderPosition),
-      linePainter,
-    );
+    canvas.drawCircle(Offset(width / 2, sliderPosition), 10, linePainter);
   }
 
   @override
@@ -311,10 +307,13 @@ class SliderPainter extends CustomPainter {
     //);
     Path path =
         Path()
-          ..moveTo(maxSize.width / 2 - 10, 0)
-          ..lineTo(maxSize.width / 2 - 20, maxSize.height)
-          ..lineTo(maxSize.width / 2 + 20, maxSize.height)
-          ..lineTo(maxSize.width / 2 + 10, 0)
+          ..moveTo(maxSize.width / 2 - 5, 0)
+          ..lineTo(maxSize.width / 2 - 5, maxSize.height)
+          //..arcToPoint(arcEnd)
+          //..arcToPoint(Offset(maxSize.width / 2 + 5, maxSize.height - 10))
+          ..lineTo(maxSize.width / 2 + 5, maxSize.height)
+          ..lineTo(maxSize.width / 2 + 5, 0)
+          //..arcToPoint(Offset(maxSize.width / 2 - 5, 10))
           ..close();
     canvas.drawPath(path, fillPainter);
   }

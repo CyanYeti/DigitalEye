@@ -6,6 +6,7 @@ import 'package:digitaleye/src/features/ui/image_viewer_widget.dart';
 import 'package:digitaleye/src/features/ui/mode_controls_widget.dart';
 import 'package:digitaleye/src/features/ui/posterize_slider_widget.dart';
 import 'package:digitaleye/src/features/ui/saturation_slider_widget.dart';
+import 'package:digitaleye/src/features/ui/user_alert_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -247,6 +248,13 @@ class ShaderUI extends ConsumerWidget {
               ),
             ),
           ),
+        ),
+
+        Positioned(
+          bottom: 50,
+          left: 0,
+          right: 0,
+          child: const UserAlertWidget(),
         ),
       ],
     );
