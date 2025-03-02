@@ -22,7 +22,13 @@ final screenImageProvider = StreamProvider.autoDispose<ui.Image>((ref) async* {
   //final ssController = ref.read(screenshotControllerProvider);
   final globalKey = ref.read(screenshotGlobalKeyProvider);
 
-  while (true) {
+  bool isActive = true;
+  ref.onDispose(() {
+    isActive = false;
+    print("disposed");
+  });
+
+  while (isActive) {
     // Throttle stream
     await Future.delayed(Duration(milliseconds: 20));
     try {

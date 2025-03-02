@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -107,6 +109,7 @@ class _MovableViewerWidgetState extends ConsumerState<MovableViewerWidget> {
 
   @override
   Widget build(BuildContext context) {
+    print("rebuilt move");
     Offset position = ref.watch(movablePositionStateProvider)['position'];
     double zoom = ref.watch(movablePositionStateProvider)['zoom'];
     // Gesture detect drags

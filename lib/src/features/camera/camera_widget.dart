@@ -45,7 +45,7 @@ class _CameraWidgetState extends ConsumerState<CameraWidget>
     _camerasFuture.then((cameras) {
       controller = CameraController(
         cameras[0],
-        ResolutionPreset.max,
+        ResolutionPreset.high,
         enableAudio: false,
       );
       controller!

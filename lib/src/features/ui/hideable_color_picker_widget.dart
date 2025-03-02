@@ -148,11 +148,11 @@ class _HideableColorPickerWidgetState extends State<HideableColorPickerWidget> {
       children: [
         Builder(
           builder: (BuildContext context) {
-            if (!isHidden) {
-              return const ColorPicker();
-            } else {
-              return SizedBox.shrink();
-            }
+            return Visibility(
+              visible: !isHidden,
+              maintainState: true,
+              child: const ColorPicker(),
+            );
           },
         ),
         //Positioned(top: 0, right: 0, left: 0, child: const ColorPicker()),

@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:ui' as ui;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:hugeicons/hugeicons.dart';
+import 'package:image/image.dart' as img;
 import '../camera/image_streamer_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -49,11 +50,12 @@ final colorPickerProvider =
       return ColorPickerState();
     });
 
+// This does not track what color space or system you are in
 class MutableColor {
-  int r = 0;
-  int g = 0;
-  int b = 0;
-  int a = 0;
+  double r = 0;
+  double g = 0;
+  double b = 0;
+  double a = 0;
 
   MutableColor() {
     r = 0;
@@ -62,7 +64,7 @@ class MutableColor {
     a = 0;
   }
 
-  MutableColor.withValues(int r, int g, int b, int a) {
+  MutableColor.withValues(double r, double g, double b, double a) {
     r = r;
     g = g;
     b = b;
@@ -70,7 +72,7 @@ class MutableColor {
   }
 
   Color toColor() {
-    return Color.fromARGB(a, r, g, b);
+    return Color.fromARGB(a.toInt(), r.toInt(), g.toInt(), b.toInt());
   }
 }
 
@@ -123,6 +125,7 @@ class ColorPicker extends ConsumerWidget {
   }
 
   // Gets the pixel info at target. If not target then middle
+  // returns color in sRGB normalized
   Future<Color?> _getPixelColor(
     ui.Image image,
     WidgetRef ref, {
@@ -181,19 +184,27 @@ class ColorPicker extends ConsumerWidget {
         int b = byteData.getUint8(pixelIndex + 2);
         int a = byteData.getUint8(pixelIndex + 3);
 
-        runningColor.r += pow(r, 2).toInt();
-        runningColor.g += pow(g, 2).toInt();
-        runningColor.b += pow(b, 2).toInt();
-        runningColor.a += pow(a, 2).toInt();
+        runningColor.r += ColorUtils.linearized(r);
+        runningColor.g += ColorUtils.linearized(g);
+        runningColor.b += ColorUtils.linearized(b);
 
         pixelCount++;
       }
     }
 
-    runningColor.r = sqrt(runningColor.r / pixelCount).round().toInt();
-    runningColor.g = sqrt(runningColor.g / pixelCount).round().toInt();
-    runningColor.b = sqrt(runningColor.b / pixelCount).round().toInt();
-    runningColor.a = sqrt(runningColor.a / pixelCount).round().toInt();
+    runningColor.r =
+        ColorUtils.delinearizedTosRGBInt(
+          runningColor.r / pixelCount,
+        ).toDouble();
+    runningColor.g =
+        ColorUtils.delinearizedTosRGBInt(
+          runningColor.g / pixelCount,
+        ).toDouble();
+    runningColor.b =
+        ColorUtils.delinearizedTosRGBInt(
+          runningColor.b / pixelCount,
+        ).toDouble();
+    runningColor.a = 255;
 
     final Color foundColor = runningColor.toColor();
 
@@ -209,12 +220,8 @@ class ColorPicker extends ConsumerWidget {
       return "Loading";
     }
 
-    late String foundName = "Loading";
-    foundName = await _findClosestName(color!, colorSet!);
-
-    //await _parseColorJson().then((colorSet) {
-
-    //});
+    String foundName = "Loading";
+    foundName = await _findClosestName(color, colorSet);
 
     return foundName;
   }
@@ -226,15 +233,17 @@ class ColorPicker extends ConsumerWidget {
     ).then((data) => data["name"]);
   }
 
+  // Color set must be a json style list with maps. Map must have a rgb and name component
   Future<Map<String, dynamic>> _findClosestColorData(
     Color color,
     List<dynamic> colorSet,
   ) async {
     Map<String, dynamic> closestColorData = colorSet[0];
     double minDistance = 9999999;
-    final int r1 = (color.r * 255).round().toInt();
-    final int g1 = (color.g * 255).round().toInt();
-    final int b1 = (color.b * 255).round().toInt();
+    final double r1 = ColorUtils.linearizedFromNormalized(color.r);
+    final double g1 = ColorUtils.linearizedFromNormalized(color.g);
+    final double b1 = ColorUtils.linearizedFromNormalized(color.b);
+
     colorSet.forEach((dynamic colorData) {
       List<String> colorRGB2String = colorData["rgb"]
           .replaceAll("(", "")
@@ -243,16 +252,15 @@ class ColorPicker extends ConsumerWidget {
       List<int> colorRGB2 = colorRGB2String.map(int.parse).toList();
 
       num distance =
-          pow(colorRGB2[0] - r1, 2) +
-          pow(colorRGB2[1] - g1, 2) +
-          pow(colorRGB2[2] - b1, 2);
+          pow(ColorUtils.linearized(colorRGB2[0]) - r1, 2) +
+          pow(ColorUtils.linearized(colorRGB2[1]) - g1, 2) +
+          pow(ColorUtils.linearized(colorRGB2[2]) - b1, 2);
 
       if (distance < minDistance) {
         minDistance = distance.toDouble();
         closestColorData = colorData;
       }
     });
-
     return closestColorData;
   }
 

@@ -19,7 +19,7 @@ class GuideWidget extends ConsumerWidget {
         ),
         IconTextPairWidget(
           icon: HugeIcons.strokeRoundedWikipedia,
-          label: ": Open wiki of current highlighted color",
+          label: ": Open wiki of current color",
         ),
         IconTextPairWidget(
           icon: HugeIcons.strokeRoundedBlend,
